@@ -1,0 +1,7 @@
+name: HoloTools
+version: '${version}'
+main: net.kokoricraft.holotools.HoloTools
+api-version: '1.19'
+commands:
+  holotools:
+    usage: /<command> help

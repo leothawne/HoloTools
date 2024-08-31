@@ -1,4 +1,4 @@
-package net.kokoricraft.holotools.utils.enums;
+package net.kokoricraft.holotools.enums;
 
 public enum DefaultFontInfo{
 

@@ -1,8 +1,9 @@
-package net.kokoricraft.holotools.objects.halowardrobe;
+package net.kokoricraft.holotools.objects.holowardrobe;
 
 import com.google.gson.JsonObject;
 import net.kokoricraft.holotools.HoloTools;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -57,34 +58,61 @@ public class WardrobeContent {
     public JsonObject getToJson(){
         JsonObject jsonObject = new JsonObject();
         if(helmet != null && helmet.getType() != Material.AIR)
-            jsonObject.addProperty("helmet", plugin.getUtils().getItemStackDecoded(helmet));
+            jsonObject.addProperty("helmet", plugin.getUtils().serializeItemStack(helmet));
 
         if(chestplate != null && chestplate.getType() != Material.AIR)
-            jsonObject.addProperty("chestplate", plugin.getUtils().getItemStackDecoded(chestplate));
+            jsonObject.addProperty("chestplate", plugin.getUtils().serializeItemStack(chestplate));
 
         if(leggings != null && leggings.getType() != Material.AIR)
-            jsonObject.addProperty("leggings", plugin.getUtils().getItemStackDecoded(leggings));
+            jsonObject.addProperty("leggings", plugin.getUtils().serializeItemStack(leggings));
 
         if(boots != null && boots.getType() != Material.AIR)
-            jsonObject.addProperty("boots", plugin.getUtils().getItemStackDecoded(boots));
+            jsonObject.addProperty("boots", plugin.getUtils().serializeItemStack(boots));
 
         return jsonObject;
+    }
+
+    public void apply(Player player){
+        player.getInventory().setHelmet(helmet);
+        player.getInventory().setChestplate(chestplate);
+        player.getInventory().setLeggings(leggings);
+        player.getInventory().setBoots(boots);
+        player.updateInventory();
+    }
+
+    public boolean isEmpty(){
+        return isNull(helmet) && isNull(chestplate) && isNull(leggings) && isNull(boots);
+    }
+
+    private boolean isNull(ItemStack itemStack){
+        return itemStack == null || itemStack.getType() == Material.AIR;
     }
 
     public static WardrobeContent fromJson(JsonObject jsonObject){
         WardrobeContent wardrobeContent = new WardrobeContent();
 
         if(jsonObject.has("helmet"))
-            wardrobeContent.setHelmet(plugin.getUtils().getItemStackEncoded(jsonObject.get("helmet").getAsString()));
+            wardrobeContent.setHelmet(plugin.getUtils().deserializeItemStack(jsonObject.get("helmet").getAsString()));
 
         if(jsonObject.has("chestplate"))
-            wardrobeContent.setChestplate(plugin.getUtils().getItemStackEncoded(jsonObject.get("chestplate").getAsString()));
+            wardrobeContent.setChestplate(plugin.getUtils().deserializeItemStack(jsonObject.get("chestplate").getAsString()));
 
         if(jsonObject.has("leggings"))
-            wardrobeContent.setLeggings(plugin.getUtils().getItemStackEncoded(jsonObject.get("leggings").getAsString()));
+            wardrobeContent.setLeggings(plugin.getUtils().deserializeItemStack(jsonObject.get("leggings").getAsString()));
 
         if(jsonObject.has("boots"))
-            wardrobeContent.setBoots(plugin.getUtils().getItemStackEncoded(jsonObject.get("boots").getAsString()));
+            wardrobeContent.setBoots(plugin.getUtils().deserializeItemStack(jsonObject.get("boots").getAsString()));
+
+        return wardrobeContent;
+    }
+
+    public static WardrobeContent fromPlayer(Player player){
+        WardrobeContent wardrobeContent = new WardrobeContent();
+
+        wardrobeContent.setHelmet(player.getInventory().getHelmet());
+        wardrobeContent.setChestplate(player.getInventory().getChestplate());
+        wardrobeContent.setLeggings(player.getInventory().getLeggings());
+        wardrobeContent.setBoots(player.getInventory().getBoots());
 
         return wardrobeContent;
     }

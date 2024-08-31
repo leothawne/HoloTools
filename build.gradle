@@ -8,20 +8,27 @@ version = '1.0.0'
 repositories {
     mavenCentral()
     maven {
-        name = "spigotmc-repo"
-        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
-    }
-    maven {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
     }
+
+    maven {
+        name = "spigotmc-repo"
+        url = "https://repo.codemc.org/repository/nms/"
+    }
+
+    maven { url 'https://maven.evokegames.gg/snapshots' }
 }
 
 dependencies {
     compileOnly "org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT"
+    compileOnly(project(path: ":v1_21_R1"))
+    implementation project(path: ':Common')
+    implementation 'me.tofaa.entitylib:spigot:2.4.9-SNAPSHOT'
 }
 
-def targetJavaVersion = 17
+def targetJavaVersion = 21
+def targetJavaLevel = 17
 java {
     def javaVersion = JavaVersion.toVersion(targetJavaVersion)
     sourceCompatibility = javaVersion
@@ -35,7 +42,7 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
-        options.release.set(targetJavaVersion)
+        options.release.set(targetJavaLevel)
     }
 }
 
@@ -50,8 +57,12 @@ processResources {
 
 jar {
     archiveFileName = "HoloTools.jar"
-    destinationDirectory = file("D:/servers/1.21/plugins")
-//    from {
-//        subprojects.collect { it.sourceSets.main.output }
-//    }
+    if (System.getProperty("user.name") == "nya") {
+        destinationDirectory = file("${System.getProperty('user.home')}/Desktop")
+    } else {
+        destinationDirectory = file("D:/servers/1.21/plugins")
+    }
+    from {
+        subprojects.collect { it.sourceSets.main.output }
+    }
 }

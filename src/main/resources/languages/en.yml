@@ -1,0 +1,11 @@
+crafter:
+  click_to_open: "&eClick to open"
+  auto_craft_on: "&aAuto craft enabled"
+  auto_craft_off: "&7Auto craft disabled"
+  click_to_craft: "Click to craft recipe"
+  click_to_save: "Click to save recipe"
+  click_to_remove: "Click to remove recipe"
+
+wardrobe:
+  click_to_save: "Click to save armor"
+  click_to_swap: "Click to swap armor"

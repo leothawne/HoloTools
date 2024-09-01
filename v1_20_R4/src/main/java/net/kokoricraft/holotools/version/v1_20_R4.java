@@ -10,18 +10,17 @@ import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import net.minecraft.util.Brightness;
+import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
-import net.minecraft.world.entity.Display;
 import net.minecraft.world.item.ItemDisplayContext;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_21_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_21_R1.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_21_R1.inventory.CraftItemStack;
-import org.bukkit.craftbukkit.v1_21_R1.util.CraftChatMessage;
+import org.bukkit.craftbukkit.v1_20_R4.CraftWorld;
+import org.bukkit.craftbukkit.v1_20_R4.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R4.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_20_R4.util.CraftChatMessage;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
@@ -30,12 +29,11 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class v1_21_R1 implements Compat{
+public class v1_20_R4 implements Compat{
 
     @Override
     public HoloTextDisplay createTextDisplay(List<Player> players, Location location, float yaw, float pitch) {
@@ -51,12 +49,12 @@ public class v1_21_R1 implements Compat{
     public void initPacketsRegister(Player player){
         try{
             ChannelPipeline pipeline = getPipeline((CraftPlayer) player);
+
             pipeline.addBefore("packet_handler", player.getName(), new ChannelDuplexHandler(){
                 @Override
                 public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
                     if(msg instanceof Packet<?> packet){
-                        String name = packet.getClass().getName();
-                        if(name.endsWith("PacketPlayOutSetSlot") || name.endsWith("ClientboundContainerSetSlotPacket")){
+                        if(packet.getClass().getName().equals("PacketPlayOutSetSlot")){
                             onPacketSend(player, packet);
                         }
                     }
@@ -83,7 +81,7 @@ public class v1_21_R1 implements Compat{
 
             return networkManager.n;
         }catch (Exception ignore){}
-       return null;
+        return null;
     }
 
     private void onPacketSend(Player player, Packet<?> packet) {
@@ -107,7 +105,7 @@ public class v1_21_R1 implements Compat{
             this.location = location;
             WorldServer world = ((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle();
             this.textDisplay = new Display.TextDisplay(EntityTypes.bb, world);
-            spawnPacket =  new PacketPlayOutSpawnEntity (textDisplay.an(), textDisplay.cz(), location.getX(), location.getY(), location.getZ(), yaw, pitch, textDisplay.am(), 0, textDisplay.dr(), textDisplay.ct());
+            spawnPacket =  new PacketPlayOutSpawnEntity(textDisplay.al(), textDisplay.cz(), location.getX(), location.getY(), location.getZ(), yaw, pitch, textDisplay.ak(), 0, textDisplay.ds(), textDisplay.cs());
 
             players.forEach(player -> {
                 ((CraftPlayer)player).getHandle().c.b(spawnPacket);
@@ -131,7 +129,7 @@ public class v1_21_R1 implements Compat{
         @Override
         public void remove() {
             if(players.isEmpty()) return;
-            PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(textDisplay.an());
+            PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(textDisplay.al()); //textDisplay.al() = getId()
             players.forEach(player -> {
                 ((CraftPlayer)player).getHandle().c.b(destroy);
             });
@@ -145,7 +143,7 @@ public class v1_21_R1 implements Compat{
         @Override
         public void setColor(Color color) {
             int colorValue = color == null ? -1 : color.asARGB();
-            textDisplay.ar().a(Display.TextDisplay.aN, colorValue);
+            textDisplay.ap().a(Display.TextDisplay.aP, colorValue); //CraftTextDisplay.setBackgroundColor
         }
 
         @Override
@@ -155,14 +153,14 @@ public class v1_21_R1 implements Compat{
 
         @Override
         public void setScale(float x, float y, float z) {
-            Transformation nms = Display.a(textDisplay.ar());
+            Transformation nms = Display.a(textDisplay.ap()); // ar = getDataWatcher
             Transformation transformation = new Transformation(nms.d(), nms.e(), new Vector3f(x, y, z), nms.g());
             textDisplay.a(transformation);
         }
 
         @Override
         public void setRotation(float x, float y, float z) {
-            Transformation nms = Display.a(textDisplay.ar());
+            Transformation nms = Display.a(textDisplay.ap());
             Quaternionf quaternionf = new Quaternionf();
             quaternionf.rotateXYZ((float) Math.toRadians(x), (float) Math.toRadians(y), (float) Math.toRadians(z));
             Transformation transformation = new Transformation(nms.d(), quaternionf, nms.f(), nms.g());
@@ -188,7 +186,7 @@ public class v1_21_R1 implements Compat{
 
         @Override
         public void setLineWidth(int width) {
-            textDisplay.ar().a(Display.TextDisplay.aN, width);
+            textDisplay.ap().a(Display.TextDisplay.aO, width);
         }
 
         @Override
@@ -220,7 +218,7 @@ public class v1_21_R1 implements Compat{
 
         @Override
         public void setTranslation(float x, float y, float z) {
-            Transformation nms = Display.a(textDisplay.ar());
+            Transformation nms = Display.a(textDisplay.ap());
             Transformation transformation = new Transformation(new Vector3f(x, y, z), nms.e(), nms.f(), nms.g());
             textDisplay.a(transformation);
         }
@@ -263,7 +261,7 @@ public class v1_21_R1 implements Compat{
         }
 
         public void internalUpdate(){
-            PacketPlayOutEntityMetadata metadata = new PacketPlayOutEntityMetadata(textDisplay.an(), textDisplay.ar().c());
+            PacketPlayOutEntityMetadata metadata = new PacketPlayOutEntityMetadata(textDisplay.al(), textDisplay.ap().c());
             players.forEach(player -> {
                 ((CraftPlayer)player).getHandle().c.b(metadata);
             });
@@ -292,7 +290,7 @@ public class v1_21_R1 implements Compat{
             this.location = location;
             WorldServer world = ((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle();
             this.itemDisplay = new Display.ItemDisplay(EntityTypes.ah, world);
-            spawnPacket =  new PacketPlayOutSpawnEntity (itemDisplay.an(), itemDisplay.cz(), location.getX(), location.getY(), location.getZ(), pitch, yaw, itemDisplay.am(), 0, itemDisplay.dr(), itemDisplay.ct());
+            spawnPacket = new PacketPlayOutSpawnEntity(itemDisplay.al(), itemDisplay.cz(), location.getX(), location.getY(), location.getZ(), pitch, yaw, itemDisplay.ak(), 0, itemDisplay.ds(), itemDisplay.cs());
 
             players.forEach(player -> {
                 ((CraftPlayer)player).getHandle().c.b(spawnPacket);
@@ -316,7 +314,7 @@ public class v1_21_R1 implements Compat{
         @Override
         public void remove() {
             if(players.isEmpty()) return;
-            PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(itemDisplay.an());
+            PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(itemDisplay.al());
             players.forEach(player -> {
                 ((CraftPlayer)player).getHandle().c.b(destroy);
             });
@@ -329,14 +327,14 @@ public class v1_21_R1 implements Compat{
 
         @Override
         public void setScale(float x, float y, float z) {
-            Transformation nms = Display.a(itemDisplay.ar());
+            Transformation nms = Display.a(itemDisplay.ap());
             Transformation transformation = new Transformation(nms.d(), nms.e(), new Vector3f(x, y, z), nms.g());
             itemDisplay.a(transformation);
         }
 
         @Override
         public void setRotation(float x, float y, float z) {
-            Transformation nms = Display.a(itemDisplay.ar());
+            Transformation nms = Display.a(itemDisplay.ap());
             Quaternionf quaternionf = new Quaternionf();
             quaternionf.rotateXYZ((float) Math.toRadians(x), (float) Math.toRadians(y), (float) Math.toRadians(z));
             Transformation transformation = new Transformation(nms.d(), quaternionf, nms.f(), nms.g());
@@ -345,7 +343,7 @@ public class v1_21_R1 implements Compat{
 
         @Override
         public void setTranslation(float x, float y, float z) {
-            Transformation nms = Display.a(itemDisplay.ar());
+            Transformation nms = Display.a(itemDisplay.ap());
             Transformation transformation = new Transformation(new Vector3f(x, y, z), nms.e(), nms.f(), nms.g());
             itemDisplay.a(transformation);
         }
@@ -386,7 +384,7 @@ public class v1_21_R1 implements Compat{
         public void setItemStack(ItemStack itemStack) {
             net.minecraft.world.item.ItemStack nmsgItemStack = CraftItemStack.asNMSCopy(itemStack);
             itemDisplay.a(nmsgItemStack);
-            PacketPlayOutEntityMetadata metadata = new PacketPlayOutEntityMetadata(itemDisplay.an(), itemDisplay.ar().c());
+            PacketPlayOutEntityMetadata metadata = new PacketPlayOutEntityMetadata(itemDisplay.al(), itemDisplay.ap().c());
             players.forEach(player -> ((CraftPlayer)player).getHandle().c.b(metadata));
         }
 
@@ -417,7 +415,7 @@ public class v1_21_R1 implements Compat{
         }
 
         public void internalUpdate(){
-            PacketPlayOutEntityMetadata metadata = new PacketPlayOutEntityMetadata(itemDisplay.an(), itemDisplay.ar().c());
+            PacketPlayOutEntityMetadata metadata = new PacketPlayOutEntityMetadata(itemDisplay.al(), itemDisplay.ap().c());
             players.forEach(player -> {
                 ((CraftPlayer)player).getHandle().c.b(metadata);
             });

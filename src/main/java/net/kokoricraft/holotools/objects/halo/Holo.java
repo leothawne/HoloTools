@@ -1,5 +1,6 @@
 package net.kokoricraft.holotools.objects.halo;
 
+import net.kokoricraft.holotools.HoloTools;
 import net.kokoricraft.holotools.enums.HoloSize;
 import net.kokoricraft.holotools.interfaces.HoloBase;
 import net.kokoricraft.holotools.interfaces.Tickable;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class Holo implements Tickable, HoloBase{
+    private final HoloTools plugin = HoloTools.getInstance();
     protected Player player;
     protected final int size;
     protected final float height;
@@ -94,5 +96,8 @@ public abstract class Holo implements Tickable, HoloBase{
     }
     public Player getPlayer(){
         return player;
+    }
+    public float getHeight(){
+        return height;
     }
 }

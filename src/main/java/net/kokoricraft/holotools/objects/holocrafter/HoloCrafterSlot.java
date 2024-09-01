@@ -4,6 +4,7 @@ import net.kokoricraft.holotools.HoloTools;
 import net.kokoricraft.holotools.objects.halo.HaloSlot;
 import net.kokoricraft.holotools.version.HoloItemDisplay;
 import net.kokoricraft.holotools.version.HoloTextDisplay;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.ItemDisplay;
@@ -38,7 +39,7 @@ public class HoloCrafterSlot {
         if(isCraftingTable){
             HoloItemDisplay craftingTable = plugin.getCompatManager().createItemDisplay(List.of(player), player.getLocation(), getYaw(), 0);
             craftingTable.setScale(0.95f, 0.95f, 0.95f);
-            craftingTable.setTranslation(0, -1, 1.9f);
+            craftingTable.setTranslation(0, -1 + 0.3f, 1.9f);
             craftingTable.setBrightness(new Display.Brightness(15, 15));
             craftingTable.setItemStack(new ItemStack(Material.CRAFTING_TABLE));
             craftingTable.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.GUI);
@@ -48,7 +49,7 @@ public class HoloCrafterSlot {
         }else if(recipe != null && recipe.getResult().getType() != Material.AIR){
             HoloItemDisplay result = plugin.getCompatManager().createItemDisplay(List.of(player), player.getLocation(), getYaw(), 0);
             result.setScale(0.5f, 0.5f, 0.5f);
-            result.setTranslation(0, -1, 1.95f);
+            result.setTranslation(0, -1 + 0.3f, 1.95f);
             result.setBrightness(new Display.Brightness(15, 15));
             result.setItemStack(recipe.getResult());
             result.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.GUI);
@@ -60,9 +61,10 @@ public class HoloCrafterSlot {
         if(textDisplay == null){
             textDisplay = plugin.getCompatManager().createTextDisplay(List.of(player), player.getLocation(), 0, getYaw() + 180);
             textDisplay.setScale(0.3f, 0.3f, 0.3f);
-            textDisplay.setTranslation(0, 0, -1.9f);
+            textDisplay.setTranslation(0, 0 + 0.3f, -1.9f);
             textDisplay.setLineWidth(200);
             textDisplay.setBrightness(new Display.Brightness(15, 15));
+            textDisplay.setColor(Color.fromARGB(0, 0, 0, 0));
             if(isCraftingTable){
                 setText(plugin.getUtils().color(plugin.getLangManager().CRAFTER_CLICK_TO_OPEN));
             }else {

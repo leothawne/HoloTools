@@ -20,7 +20,7 @@ public class HoloCrafter extends Holo implements HoloBase {
     private Recipe lasted_recipe;
 
     public HoloCrafter(Player player, Map<Integer, Recipe> recipeMap, ItemStack itemStack) {
-        super(8, -1.8f, itemStack);
+        super(8, -1.5f, itemStack);
         this.player = player;
 
         for(int key : slots.keySet()){

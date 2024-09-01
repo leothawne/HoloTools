@@ -11,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +20,7 @@ public class HoloManager {
     private final HoloTools plugin;
     private final Map<Player, Holo> opened = new HashMap<>();
     public static NamespacedKey HOLO_KEY;
+    private final Map<Player, BukkitTask> tasks = new HashMap<>();
 
     public HoloManager(HoloTools plugin){
         this.plugin = plugin;
@@ -102,5 +104,14 @@ public class HoloManager {
         return opened.get(player);
     }
 
+    public void update(Player player, long time){
+        if(tasks.containsKey(player)) return;
 
+        BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            plugin.getHoloManager().check(player);
+            tasks.remove(player);
+        }, time);
+
+        tasks.put(player, task);
+    }
 }

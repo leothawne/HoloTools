@@ -9,4 +9,6 @@ import java.util.List;
 public interface Compat {
     HoloTextDisplay createTextDisplay(List<Player> players, Location location, float yaw, float pitch);
     HoloItemDisplay createItemDisplay(List<Player> players, Location location, float yaw, float pitch);
+    void initPacketsRegister(Player player);
+    void removePlayers();
 }

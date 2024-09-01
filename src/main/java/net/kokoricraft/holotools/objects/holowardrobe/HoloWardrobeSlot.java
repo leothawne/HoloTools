@@ -19,7 +19,7 @@ public class HoloWardrobeSlot {
     private final boolean second;
     private final Map<EquipmentSlot, HoloItemDisplay> entities = new HashMap<>();
     private final float separation = 0.5f;
-    private final float y_translation = 1.9f;
+    private final float y_translation = 1.9f - 0.3f;
 
     public HoloWardrobeSlot(HaloSlot slot, WardrobeContent content, Player player, boolean second){
         this.slot = slot;

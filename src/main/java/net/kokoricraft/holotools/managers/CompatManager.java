@@ -69,4 +69,8 @@ public class CompatManager {
     public HoloItemDisplay createItemDisplay(List<Player> players, Location location, float yaw, float pitch){
         return compat.createItemDisplay(players, location, yaw, pitch);
     }
+
+    public Compat getCompat() {
+        return compat;
+    }
 }

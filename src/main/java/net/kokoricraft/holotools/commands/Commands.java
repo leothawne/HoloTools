@@ -5,6 +5,8 @@ import com.google.gson.JsonObject;
 import net.kokoricraft.holotools.HoloTools;
 import net.kokoricraft.holotools.managers.HoloManager;
 import net.kokoricraft.holotools.objects.holocrafter.HoloCrafter;
+import net.kokoricraft.holotools.version.Compat;
+import net.kokoricraft.holotools.version.v1_21_R1;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -92,13 +94,6 @@ public class Commands implements CommandExecutor {
                 player.sendMessage("aaaaaaa");
             }
             case "awa" ->{
-                Interaction interaction = player.getWorld().spawn(player.getLocation(), Interaction.class, entity ->{
-                   entity.setInteractionWidth(3);
-                   entity.setInteractionHeight(3);
-                   entity.setResponsive(true);
-                });
-
-                Bukkit.getScheduler().runTaskLater(plugin, interaction::remove, 20 * 20);
             }
         }
 

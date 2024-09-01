@@ -105,7 +105,7 @@ public class DataManager {
 
         JsonObject jsonObject = new JsonObject();
 
-        for(int slot = 1; slot < 9; slot++){
+        for(int slot = 0; slot < 9; slot++){
             if(!slots.containsKey(slot)) continue;
             WardrobeContent content = slots.get(slot).getContent();
 

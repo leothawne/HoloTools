@@ -5,6 +5,7 @@ import net.kokoricraft.holotools.enums.HoloColors;
 import net.kokoricraft.holotools.interfaces.HoloBase;
 import net.kokoricraft.holotools.objects.halo.HaloSlot;
 import net.kokoricraft.holotools.objects.halo.Holo;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -15,7 +16,7 @@ public class HoloWardrobe extends Holo implements HoloBase {
     private final HoloTools plugin = HoloTools.getInstance();
     private final Map<Integer, HoloWardrobeSlot> wardrobeSlots = new HashMap<>();
     public HoloWardrobe(Player player, ItemStack itemStack, Map<Integer, WardrobeContent> contentMap) {
-        super(8, -1.8f, itemStack);
+        super(8, -1.5f, itemStack);
         this.player = player;
 
         for(int key : slots.keySet()){
@@ -72,7 +73,6 @@ public class HoloWardrobe extends Holo implements HoloBase {
             loadArmor.apply(player);
             plugin.getDataManager().saveHoloWardrobe(itemStack, this, "swap wardrobe armor");
         }
-
     }
 
     @Override

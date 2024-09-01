@@ -40,6 +40,7 @@ public final class HoloTools extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+        compatManager.getCompat().removePlayers();
         for(Tickable tickable : tickManager.getTickableList()){
             if(tickable instanceof Holo holo){
                 holo.setVisible(false);
@@ -73,7 +74,10 @@ public final class HoloTools extends JavaPlugin {
     }
 
     private void checkPlayers(){
-        Bukkit.getOnlinePlayers().forEach(player -> holoManager.check(player));
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            compatManager.getCompat().initPacketsRegister(player);
+            holoManager.check(player);
+        });
     }
     public void reloadConfig(){
         configManager.loadConfig();

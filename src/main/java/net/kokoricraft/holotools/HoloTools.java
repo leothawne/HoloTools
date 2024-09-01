@@ -1,6 +1,7 @@
 package net.kokoricraft.holotools;
 
 import net.kokoricraft.holotools.commands.Commands;
+import net.kokoricraft.holotools.commands.CommandsCompleter;
 import net.kokoricraft.holotools.interfaces.Tickable;
 import net.kokoricraft.holotools.listeners.HoloCrafterListener;
 import net.kokoricraft.holotools.listeners.HoloListener;
@@ -52,6 +53,7 @@ public final class HoloTools extends JavaPlugin {
         PluginCommand command = getCommand("holotools");
         if(command == null) return;
         command.setExecutor(new Commands(this));
+        command.setTabCompleter(new CommandsCompleter());
     }
 
     private void initClass(){

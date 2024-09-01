@@ -20,6 +20,8 @@ public class LangManager {
     public String CRAFTER_CLICK_TO_REMOVE;
     public String WARDROBE_CLICK_TO_SAVE;
     public String WARDROBE_CLICK_TO_SWAP;
+    public String NO_PERMISSION;
+    public String CONFIG_RELOADED;
 
     public LangManager(HoloTools plugin){
         this.plugin = plugin;
@@ -29,17 +31,24 @@ public class LangManager {
     public void loadMessages(){
         NekoConfig messages = new NekoConfig("languages/"+plugin.getConfigManager().LANG+".yml", plugin);
 
-        CRAFTER_CLICK_TO_OPEN = messages.getString("crafter.click_to_open", getDefaultString("crafter.click_to_open"));
-        CRAFTER_AUTO_ON = messages.getString("crafter.auto_craft_on", getDefaultString("crafter.auto_craft_on"));
-        CRAFTER_AUTO_OFF = messages.getString("crafter.auto_craft_off", getDefaultString("crafter.auto_craft_off"));
-        CRAFTER_CLICK_TO_CRAFT = messages.getString("crafter.click_to_craft", getDefaultString("crafter.click_to_craft"));
-        CRAFTER_CLICK_TO_SAVE = messages.getString("crafter.click_to_save", getDefaultString("crafter.click_to_save"));
-        CRAFTER_CLICK_TO_REMOVE = messages.getString("crafter.click_to_remove", getDefaultString("crafter.click_to_remove"));
+        CRAFTER_CLICK_TO_OPEN = getStringWithDefault(messages, "crafter.click_to_open");
+        CRAFTER_AUTO_ON = getStringWithDefault(messages, "crafter.auto_craft_on");
+        CRAFTER_AUTO_OFF = getStringWithDefault(messages, "crafter.auto_craft_off");
+        CRAFTER_CLICK_TO_CRAFT = getStringWithDefault(messages, "crafter.click_to_craft");
+        CRAFTER_CLICK_TO_SAVE = getStringWithDefault(messages, "crafter.click_to_save");
+        CRAFTER_CLICK_TO_REMOVE = getStringWithDefault(messages, "crafter.click_to_remove");
 
-        WARDROBE_CLICK_TO_SAVE = messages.getString("wardrobe.click_to_save", getDefaultString("wardrobe.click_to_save"));
-        WARDROBE_CLICK_TO_SWAP = messages.getString("wardrobe.click_to_swap", getDefaultString("wardrobe.click_to_swap"));
+        WARDROBE_CLICK_TO_SAVE = getStringWithDefault(messages, "wardrobe.click_to_save");
+        WARDROBE_CLICK_TO_SWAP = getStringWithDefault(messages, "wardrobe.click_to_swap");
+
+        NO_PERMISSION = getStringWithDefault(messages, "others.no_permission");
+        CONFIG_RELOADED = getStringWithDefault(messages, "others.config_reloaded");
 
         messages.update();
+    }
+
+    private String getStringWithDefault(NekoConfig config, String path){
+        return config.getString(path, getDefaultString(path));
     }
 
     private YamlConfiguration getDefaultLangFile(String name){

@@ -9,3 +9,7 @@ crafter:
 wardrobe:
   click_to_save: "Click to save armor"
   click_to_swap: "Click to swap armor"
+
+others:
+  config_reloaded: "&aConfiguration reloaded successfully!"
+  no_permission: "&cYou do not have permission to do this"

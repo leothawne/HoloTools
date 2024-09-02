@@ -5,3 +5,24 @@ api-version: '1.19'
 commands:
   holotools:
     usage: /<command> help
+    permission: holotools.help
+
+permissions:
+  holotools.help:
+    description: Permission to use main command
+    default: op
+  holotools.test:
+    description: test permission
+    default: op
+    children:
+      holotools.help: true
+  holotools.command.give:
+    description: Give players permission to give a tool
+    default: op
+    children:
+      holotools.help: true
+  holotools.command.reload:
+    description: Give players permission to reload the plugin
+    default: op
+    children:
+      holotools.help: true

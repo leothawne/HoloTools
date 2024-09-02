@@ -13,20 +13,32 @@ public class CommandsCompleter implements TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
-        return switch (args.length) {
-            case 1 -> Arrays.asList("give", "reload").stream()
-                    .filter(s -> s.startsWith(args[0].toLowerCase()))
-                    .collect(Collectors.toList());
-            case 2 -> "give".equalsIgnoreCase(args[0]) ?
-                    Arrays.asList("holocrafter", "holowardrobe").stream()
-                            .filter(s -> s.startsWith(args[1].toLowerCase()))
-                            .collect(Collectors.toList()) : null;
-            case 3 -> "give".equalsIgnoreCase(args[0]) && isNumeric(args[1]) ?
-                    Arrays.asList("1", "2", "3", "4", "5").stream()
-                            .filter(s -> s.startsWith(args[2].toLowerCase()))
-                            .collect(Collectors.toList()) : null;
-            default -> new ArrayList<>();
+        switch (args.length) {
+            case 1 : {
+                ArrayList<String> cmds = new ArrayList<>();
+                if(sender.hasPermission("holotools.command.give")) cmds.add("give");
+                if(sender.hasPermission("holotools.command.reload")) cmds.add("reload");
+                return cmds.stream()
+                        .filter(s -> s.startsWith(args[0].toLowerCase()))
+                        .collect(Collectors.toList());
+            }
+            case 2 : {
+                if(!sender.hasPermission("holotools.command.give")) break;
+                return "give".equalsIgnoreCase(args[0]) ?
+                        Arrays.asList("holocrafter", "holowardrobe").stream()
+                                .filter(s -> s.startsWith(args[1].toLowerCase()))
+                                .collect(Collectors.toList()) : null;
+            }
+            case 3 : {
+                if(!sender.hasPermission("holotools.command.give")) break;
+                return "give".equalsIgnoreCase(args[0]) && isNumeric(args[1]) ?
+                        Arrays.asList("1", "2", "3", "4", "5").stream()
+                                .filter(s -> s.startsWith(args[2].toLowerCase()))
+                                .collect(Collectors.toList()) : null;
+            }
+            default : break;
         };
+        return new ArrayList<>();
     }
 
     private boolean isNumeric(String str) {

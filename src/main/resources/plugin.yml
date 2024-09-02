@@ -11,11 +11,6 @@ permissions:
   holotools.help:
     description: Permission to use main command
     default: op
-  holotools.test:
-    description: test permission
-    default: op
-    children:
-      holotools.help: true
   holotools.command.give:
     description: Give players permission to give a tool
     default: op

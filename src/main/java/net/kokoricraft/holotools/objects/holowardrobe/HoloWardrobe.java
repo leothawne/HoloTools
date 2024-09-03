@@ -68,9 +68,10 @@ public class HoloWardrobe extends Holo implements HoloBase {
             plugin.getDataManager().saveHoloWardrobe(itemStack, this, "save wardrobe armor");
         }else{
             WardrobeContent loadArmor = wardrobeSlot.getContent();
-            if(loadArmor.isEmpty() && saveArmor.isEmpty()) return;
+            if((loadArmor == null || loadArmor.isEmpty()) && saveArmor.isEmpty()) return;
             wardrobeSlot.setContent(saveArmor);
-            loadArmor.apply(player);
+            if(loadArmor != null)
+                loadArmor.apply(player);
             plugin.getDataManager().saveHoloWardrobe(itemStack, this, "swap wardrobe armor");
         }
     }

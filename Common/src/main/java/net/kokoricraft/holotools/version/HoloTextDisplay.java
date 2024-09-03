@@ -1,6 +1,6 @@
 package net.kokoricraft.holotools.version;
 
-import org.bukkit.Color;
+import net.kokoricraft.holotools.utils.objects.HoloColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
@@ -10,7 +10,7 @@ public interface HoloTextDisplay {
     void update(Location location);
     void remove();
     void setText(String text);
-    void setColor(Color color);
+    void setColor(HoloColor color);
     void setGlowing(boolean glowing);
     void setScale(float x, float y, float z);
     void setRotation(float x, float y, float z);

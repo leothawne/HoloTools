@@ -2,6 +2,7 @@ package net.kokoricraft.holotools.objects.halo;
 
 import com.google.common.collect.Lists;
 import net.kokoricraft.holotools.HoloTools;
+import net.kokoricraft.holotools.utils.objects.HoloColor;
 import net.kokoricraft.holotools.version.HoloItemDisplay;
 import net.kokoricraft.holotools.version.HoloTextDisplay;
 import org.bukkit.*;
@@ -26,7 +27,7 @@ public class HaloSlot {
     private final Map<String, HoloItemDisplay> itemDisplayMap = new HashMap<>();
     private final Map<String, HoloTextDisplay> textDisplayMap = new HashMap<>();
     private final HoloTools plugin = JavaPlugin.getPlugin(HoloTools.class);
-    private Color color = Color.fromARGB(150, 25, 167, 210);
+    private HoloColor color = HoloColor.fromARGB(150, 25, 167, 210);
 
     public HaloSlot(int slot, double x, double y, double z, float x_size, float y_size, float z_size, float rotation) {
         this.slot = slot;
@@ -62,7 +63,7 @@ public class HaloSlot {
         textDisplayMap.values().forEach(HoloTextDisplay::remove);
     }
 
-    public void setColor(Color color){
+    public void setColor(HoloColor color){
         if(background == null){
             this.color = color;
             return;

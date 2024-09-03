@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.math.Transformation;
 import io.netty.channel.*;
 import net.kokoricraft.holotools.events.InventoryUpdateEvent;
+import net.kokoricraft.holotools.utils.objects.HoloColor;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.*;
@@ -15,7 +16,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.ItemDisplayContext;
 import org.bukkit.Bukkit;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_20_R4.CraftWorld;
 import org.bukkit.craftbukkit.v1_20_R4.entity.CraftPlayer;
@@ -54,7 +54,8 @@ public class v1_20_R4 implements Compat{
                 @Override
                 public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
                     if(msg instanceof Packet<?> packet){
-                        if(packet.getClass().getName().equals("PacketPlayOutSetSlot")){
+                        String name = packet.getClass().getName();
+                        if(name.endsWith("PacketPlayOutSetSlot") || name.endsWith("ClientboundContainerSetSlotPacket")){
                             onPacketSend(player, packet);
                         }
                     }
@@ -141,7 +142,7 @@ public class v1_20_R4 implements Compat{
         }
 
         @Override
-        public void setColor(Color color) {
+        public void setColor(HoloColor color) {
             int colorValue = color == null ? -1 : color.asARGB();
             textDisplay.ap().a(Display.TextDisplay.aP, colorValue); //CraftTextDisplay.setBackgroundColor
         }
@@ -250,9 +251,7 @@ public class v1_20_R4 implements Compat{
             entityPlayer.p = ImmutableList.copyOf(list);
             PacketPlayOutMount packet = new PacketPlayOutMount(entityPlayer);
 
-            players.forEach(player -> {
-                ((CraftPlayer)player).getHandle().c.b(packet);
-            });
+            players.forEach(player -> ((CraftPlayer)player).getHandle().c.b(packet));
         }
 
         @Override

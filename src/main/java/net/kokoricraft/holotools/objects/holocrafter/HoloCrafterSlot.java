@@ -2,6 +2,7 @@ package net.kokoricraft.holotools.objects.holocrafter;
 
 import net.kokoricraft.holotools.HoloTools;
 import net.kokoricraft.holotools.objects.halo.HaloSlot;
+import net.kokoricraft.holotools.utils.objects.HoloColor;
 import net.kokoricraft.holotools.version.HoloItemDisplay;
 import net.kokoricraft.holotools.version.HoloTextDisplay;
 import org.bukkit.Color;
@@ -64,7 +65,7 @@ public class HoloCrafterSlot {
             textDisplay.setTranslation(0, 0 + 0.3f, -1.9f);
             textDisplay.setLineWidth(200);
             textDisplay.setBrightness(new Display.Brightness(15, 15));
-            textDisplay.setColor(Color.fromARGB(0, 0, 0, 0));
+            textDisplay.setColor(HoloColor.fromARGB(0, 0, 0, 0));
             if(isCraftingTable){
                 setText(plugin.getUtils().color(plugin.getLangManager().CRAFTER_CLICK_TO_OPEN));
             }else {

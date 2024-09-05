@@ -4,6 +4,7 @@ import net.kokoricraft.holotools.HoloTools;
 import net.kokoricraft.holotools.enums.HoloSize;
 import net.kokoricraft.holotools.interfaces.HoloBase;
 import net.kokoricraft.holotools.interfaces.Tickable;
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -21,6 +22,7 @@ public abstract class Holo implements Tickable, HoloBase{
     protected boolean visible = false;
     protected final Map<Integer, HaloSlot> slots = new HashMap<>();
     protected final ItemStack itemStack;
+    protected float initial_yaw = 0;
 
     public Holo(int size, float height, ItemStack itemStack){
         this.size = size;
@@ -31,12 +33,13 @@ public abstract class Holo implements Tickable, HoloBase{
 
         for(int i = 0; i < size; i++){
             float rotation = 360.0f / size * i - 90;
-            HaloSlot slot = new HaloSlot(i, sizeData.getX(), height, sizeData.getZ(), sizeData.getXSize(), sizeData.getYSize(), sizeData.getZSize(), rotation);
+            HaloSlot slot = new HaloSlot(i, sizeData.getX(), height, sizeData.getZ(), sizeData.getXSize(), sizeData.getYSize(), sizeData.getZSize(), rotation, this);
             slots.put(i, slot);
         }
     }
 
     public void spawn(Player player){
+        this.initial_yaw = player.getLocation().getYaw();
         slots.values().forEach(slot -> slot.spawn(player));
     }
 
@@ -80,15 +83,16 @@ public abstract class Holo implements Tickable, HoloBase{
         }
     }
 
-    public int getPlayerSlot() {
+    public int getPlayerSlot(){
         if (player == null)
             return -1;
 
-        float yaw = (player.getLocation().getYaw() + 360 - 90) % 360;
+        float yaw = (player.getLocation().getYaw() + 360) % 360;
+        yaw = (yaw - initial_yaw + 360) % 360;
 
         float degreesPerSlot = 360f / this.size;
 
-        return (int) (((yaw + (degreesPerSlot / 2)) / degreesPerSlot) % this.size);
+        return (int) (((yaw + degreesPerSlot / 2) % 360) / degreesPerSlot);
     }
 
     public ItemStack getItemStack(){
@@ -99,5 +103,8 @@ public abstract class Holo implements Tickable, HoloBase{
     }
     public float getHeight(){
         return height;
+    }
+    public float getInitialYaw(){
+        return initial_yaw;
     }
 }

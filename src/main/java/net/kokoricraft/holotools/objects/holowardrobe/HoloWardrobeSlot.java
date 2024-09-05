@@ -127,7 +127,7 @@ public class HoloWardrobeSlot {
         return second;
     }
     private float getYaw(){
-        return 90 + (45 * slot.getSlot());
+        return (45 * slot.getSlot() + slot.getInitialYaw());
     }
 
 }

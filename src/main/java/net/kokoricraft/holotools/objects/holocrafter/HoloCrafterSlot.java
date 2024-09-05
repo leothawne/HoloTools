@@ -95,7 +95,7 @@ public class HoloCrafterSlot {
     }
 
     private float getYaw(){
-        return 90 + (45 * haloSlot.getSlot());
+        return  (45 * haloSlot.getSlot() + haloSlot.getInitialYaw());
     }
 
     public Recipe getRecipe(){

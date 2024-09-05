@@ -28,8 +28,9 @@ public class HaloSlot {
     private final Map<String, HoloTextDisplay> textDisplayMap = new HashMap<>();
     private final HoloTools plugin = JavaPlugin.getPlugin(HoloTools.class);
     private HoloColor color = HoloColor.fromARGB(150, 25, 167, 210);
+    private final Holo holo;
 
-    public HaloSlot(int slot, double x, double y, double z, float x_size, float y_size, float z_size, float rotation) {
+    public HaloSlot(int slot, double x, double y, double z, float x_size, float y_size, float z_size, float rotation, Holo holo) {
         this.slot = slot;
         this.x = x;
         this.y = y;
@@ -38,6 +39,7 @@ public class HaloSlot {
         this.y_size = y_size;
         this.z_size = z_size;
         this.rotation = rotation;
+        this.holo = holo;
     }
 
     public void spawn(Player player){
@@ -45,7 +47,7 @@ public class HaloSlot {
         World world = location.getWorld();
         if(world == null) return;
 
-        background = plugin.getCompatManager().createTextDisplay(Lists.newArrayList(player), location, 0, rotation);
+        background = plugin.getCompatManager().createTextDisplay(Lists.newArrayList(player), location, 0, rotation + holo.getInitialYaw() - 90);
         background.setTranslation((float) x, (float) y, (float) z);
         background.setScale(x_size, y_size, z_size);
         background.setText(" ");
@@ -91,5 +93,8 @@ public class HaloSlot {
 
     public int getSlot(){
         return slot;
+    }
+    public float getInitialYaw(){
+        return holo.getInitialYaw();
     }
 }

@@ -218,7 +218,7 @@ public class v1_19_R3 implements Compat{
         @Override
         public void setTranslation(float x, float y, float z) {
             Transformation nms = Display.a(textDisplay.aj());
-            Transformation transformation = new Transformation(new Vector3f(x, y, z), nms.e(), nms.f(), nms.g());
+            Transformation transformation = new Transformation(new Vector3f(x, y+.3f, z), nms.e(), nms.f(), nms.g());
             textDisplay.a(transformation);
         }
 
@@ -344,7 +344,7 @@ public class v1_19_R3 implements Compat{
         @Override
         public void setTranslation(float x, float y, float z) {
             Transformation nms = Display.a(itemDisplay.aj());
-            Transformation transformation = new Transformation(new Vector3f(x, y, z), nms.e(), nms.f(), nms.g());
+            Transformation transformation = new Transformation(new Vector3f(x, y+.3f, z), nms.e(), nms.f(), nms.g());
             itemDisplay.a(transformation);
         }
 

@@ -1,12 +1,14 @@
 package net.kokoricraft.holotools.utils;
 
 import net.kokoricraft.holotools.HoloTools;
+import net.kokoricraft.holotools.commands.Commands;
 import net.kokoricraft.holotools.enums.DefaultFontInfo;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.profile.PlayerProfile;
@@ -30,6 +32,7 @@ import java.util.zip.GZIPOutputStream;
 public class Utils {
     private final HoloTools plugin;
     private final Pattern hex_pattern = Pattern.compile("(&#|#)([A-Fa-f0-9]{6})");
+    private List<CommandSender> debuggers = new ArrayList<>();
     public Utils(HoloTools plugin){
         this.plugin = plugin;
     }
@@ -66,6 +69,7 @@ public class Utils {
 
             return Base64.getEncoder().encodeToString(byteStream.toByteArray());
         } catch (Exception exception) {
+            //debug("Error transforming ItemStack to base64. "+exception);
             throw new IllegalStateException("Error transforming ItemStack to base64.", exception);
         }
     }
@@ -82,6 +86,7 @@ public class Utils {
 
             return itemStack;
         } catch (IOException | ClassNotFoundException exception) {
+            //debug("Error transforming base64 to ItemStack. "+exception);
             throw new IllegalStateException("Error transforming base64 to ItemStack.", exception);
         }
     }
@@ -183,6 +188,20 @@ public class Utils {
 
         texts.add(text.substring(index));
         return texts;
+    }
+
+    public void debug(String message){
+        debuggers.forEach(sender -> sender.sendMessage(message));
+    }
+
+    public boolean toggleDebug(CommandSender sender){
+        if(debuggers.contains(sender)){
+            debuggers.remove(sender);
+            return false;
+        }
+
+        debuggers.add(sender);
+        return true;
     }
 
 }

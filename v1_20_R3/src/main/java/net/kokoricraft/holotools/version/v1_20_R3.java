@@ -8,6 +8,7 @@ import net.kokoricraft.holotools.utils.objects.HoloColor;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.*;
+import net.minecraft.server.level.EntityPlayer;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import net.minecraft.util.Brightness;
@@ -29,20 +30,24 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class v1_20_R3 implements Compat{
+    public final Map<Integer, Map<Integer, Entity>> passengers = new HashMap<>();
 
     @Override
     public HoloTextDisplay createTextDisplay(List<Player> players, Location location, float yaw, float pitch) {
-        return new HoloDisplayText(players, location, yaw, pitch);
+        return new HoloDisplayText(players, location, yaw, pitch, this);
     }
 
     @Override
     public HoloItemDisplay createItemDisplay(List<Player> players, Location location, float yaw, float pitch) {
-        return new HoloDisplayItem(players, location, yaw, pitch);
+        return new HoloDisplayItem(players, location, yaw, pitch, this);
+    }
+    public void remove(int targetID, int entity){
+        Map<Integer, Entity> entities = passengers.getOrDefault(targetID, new HashMap<>());
+        entities.remove(entity);
+        passengers.put(targetID, entities);
     }
 
     @Override
@@ -56,6 +61,38 @@ public class v1_20_R3 implements Compat{
                         String name = packet.getClass().getName();
                         if(name.endsWith("PacketPlayOutSetSlot") || name.endsWith("ClientboundContainerSetSlotPacket")){
                             onPacketSend(player);
+                        }
+
+                        if(name.endsWith("ClientboundSetPassengersPacket") || name.endsWith("PacketPlayOutMount")){
+                            boolean isPaper = name.endsWith("ClientboundSetPassengersPacket");
+                            String vehicleFieldName = isPaper ? "vehicle" : "a";
+                            String passengersFieldName = isPaper ? "passengers" : "b";
+
+                            try {
+                                Field targetField = msg.getClass().getDeclaredField(vehicleFieldName);
+                                targetField.setAccessible(true);
+                                int targetID = targetField.getInt(msg);
+
+                                Field passengersField = msg.getClass().getDeclaredField(passengersFieldName);
+                                passengersField.setAccessible(true);
+                                int[] passengersID = (int[]) passengersField.get(msg);
+
+                                Map<Integer, Entity> entities = passengers.getOrDefault(targetID, new HashMap<>());
+
+                                int[] newPassengersID = new int[passengersID.length + entities.size()];
+
+                                System.arraycopy(passengersID, 0, newPassengersID, 0, passengersID.length);
+
+                                int index = passengersID.length;
+                                for (Integer entityID : entities.keySet()) {
+                                    newPassengersID[index++] = entityID;
+                                }
+
+                                passengersField.set(msg, newPassengersID);
+
+                            } catch (Exception exception) {
+                                exception.printStackTrace();
+                            }
                         }
                     }
                     super.write(ctx, msg, promise);
@@ -99,8 +136,11 @@ public class v1_20_R3 implements Compat{
         private final Display.TextDisplay textDisplay;
         private Location location;
         private final Packet<?> spawnPacket;
+        private final v1_20_R3 manager;
+        private Player target;
 
-        public HoloDisplayText(List<Player> players, Location location, float yaw, float pitch){
+        public HoloDisplayText(List<Player> players, Location location, float yaw, float pitch, Compat manager){
+            this.manager = (v1_20_R3) manager;
             this.players = players;
             this.location = location;
             WorldServer world = ((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle();
@@ -115,8 +155,6 @@ public class v1_20_R3 implements Compat{
         public void update(Location location) {
             if(players.isEmpty()) return;
             this.location = location;
-            textDisplay.o(location.getX(), location.getY(), location.getZ()); //setPosRaw
-            textDisplay.a_(location.getX(), location.getY(), location.getZ());
             PacketPlayOutEntityTeleport teleport = new PacketPlayOutEntityTeleport(textDisplay);
             players.forEach(player -> {
                 ((CraftPlayer)player).getHandle().c.b(teleport);
@@ -132,6 +170,7 @@ public class v1_20_R3 implements Compat{
             players.forEach(player -> {
                 ((CraftPlayer)player).getHandle().c.b(destroy);
             });
+            manager.remove(target.getEntityId(), textDisplay.aj());
         }
 
         @Override
@@ -241,8 +280,14 @@ public class v1_20_R3 implements Compat{
 
         @Override
         public void mount(Player target) {
+            this.target =  target;
             Entity entityPlayer = ((CraftPlayer)target).getHandle();
             List<Entity> list = new ArrayList<>(entityPlayer.r);
+            List<Entity> backup = new ArrayList<>(list);
+            Map<Integer, Entity> entities = manager.passengers.getOrDefault(target.getEntityId(), new HashMap<>());
+            entities.put(textDisplay.aj(), textDisplay);
+            manager.passengers.put(target.getEntityId(), entities);
+
             if(!list.contains(textDisplay))
                 list.add(textDisplay);
 
@@ -252,6 +297,8 @@ public class v1_20_R3 implements Compat{
             players.forEach(player -> {
                 ((CraftPlayer)player).getHandle().c.b(packet);
             });
+
+            entityPlayer.r = ImmutableList.copyOf(backup);
         }
 
         @Override
@@ -278,13 +325,15 @@ public class v1_20_R3 implements Compat{
     }
 
     public static class HoloDisplayItem implements HoloItemDisplay{
-
         private List<Player> players = new ArrayList<>();
         private final Display.ItemDisplay itemDisplay;
         private Location location;
         private final Packet<?> spawnPacket;
+        private final v1_20_R3 manager;
+        private Player target;
 
-        public HoloDisplayItem(List<Player> players, Location location, float yaw, float pitch){
+        public HoloDisplayItem(List<Player> players, Location location, float yaw, float pitch, Compat manager){
+            this.manager = (v1_20_R3) manager;
             this.players = players;
             this.location = location;
             WorldServer world = ((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle();
@@ -300,8 +349,6 @@ public class v1_20_R3 implements Compat{
         public void update(Location location) {
             if(players.isEmpty()) return;
             this.location = location;
-            itemDisplay.o(location.getX(), location.getY(), location.getZ()); //setPosRaw
-            itemDisplay.a_(location.getX(), location.getY(), location.getZ());
             PacketPlayOutEntityTeleport teleport = new PacketPlayOutEntityTeleport(itemDisplay);
             players.forEach(player -> {
                 ((CraftPlayer)player).getHandle().c.b(teleport);
@@ -317,6 +364,7 @@ public class v1_20_R3 implements Compat{
             players.forEach(player -> {
                 ((CraftPlayer)player).getHandle().c.b(destroy);
             });
+            manager.remove(target.getEntityId(), itemDisplay.aj());
         }
 
         @Override
@@ -366,8 +414,14 @@ public class v1_20_R3 implements Compat{
 
         @Override
         public void mount(Player target) {
+            this.target =  target;
             Entity entityPlayer = ((CraftPlayer)target).getHandle();
             List<Entity> list = new ArrayList<>(entityPlayer.r);
+            List<Entity> backup = new ArrayList<>(list);
+            Map<Integer, Entity> entities = manager.passengers.getOrDefault(target.getEntityId(), new HashMap<>());
+            entities.put(itemDisplay.aj(), itemDisplay);
+            manager.passengers.put(target.getEntityId(), entities);
+
             if(!list.contains(itemDisplay))
                 list.add(itemDisplay);
 
@@ -377,6 +431,8 @@ public class v1_20_R3 implements Compat{
             players.forEach(player -> {
                 ((CraftPlayer)player).getHandle().c.b(packet);
             });
+
+            entityPlayer.r = ImmutableList.copyOf(backup);
         }
 
         @Override

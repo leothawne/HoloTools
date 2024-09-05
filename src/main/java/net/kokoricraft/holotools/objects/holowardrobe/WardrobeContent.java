@@ -100,8 +100,10 @@ public class WardrobeContent {
         if(jsonObject.has("leggings"))
             wardrobeContent.setLeggings(plugin.getUtils().deserializeItemStack(jsonObject.get("leggings").getAsString()));
 
-        if(jsonObject.has("boots"))
-            wardrobeContent.setBoots(plugin.getUtils().deserializeItemStack(jsonObject.get("boots").getAsString()));
+        if(jsonObject.has("boots")){
+            ItemStack loadedBoots = plugin.getUtils().deserializeItemStack(jsonObject.get("boots").getAsString());
+            wardrobeContent.setBoots(loadedBoots);
+        }
 
         return wardrobeContent;
     }

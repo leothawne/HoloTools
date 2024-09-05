@@ -10,6 +10,7 @@ import net.kokoricraft.holotools.managers.*;
 import net.kokoricraft.holotools.objects.halo.Holo;
 import net.kokoricraft.holotools.objects.holocrafter.HoloCrafter;
 import net.kokoricraft.holotools.utils.CraftItemsUtils;
+import net.kokoricraft.holotools.utils.Metrics;
 import net.kokoricraft.holotools.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
@@ -66,6 +67,8 @@ public final class HoloTools extends JavaPlugin {
         dataManager = new DataManager(this);
         configManager = new ConfigManager(this);
         langManager = new LangManager(this);
+
+        new Metrics(this, 23286);
     }
 
     private void initListeners(){

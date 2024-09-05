@@ -95,7 +95,7 @@ public class DataManager {
 
     public void saveHoloWardrobe(ItemStack itemStack, HoloWardrobe wardrobe, String reason){
         Player player = wardrobe.getPlayer();
-        //Bukkit.broadcastMessage("wardrobe save for: "+reason);
+        //plugin.getUtils().debug("wardrobe save for: "+reason);
         Map<Integer, HoloWardrobeSlot> slots = wardrobe.getWardrobeSlots();
 
         if(itemStack == null || slots.isEmpty()) return;
@@ -114,8 +114,10 @@ public class DataManager {
             jsonObject.addProperty("slot_"+slot, content.getToJson().toString());
         }
 
+
         meta.getPersistentDataContainer().set(WARDROBE_KEY, PersistentDataType.STRING, jsonObject.toString());
         itemStack.setItemMeta(meta);
+
 
         if(!plugin.getHoloManager().isHolo(player.getInventory().getItemInMainHand())) return;
         player.getInventory().setItemInMainHand(itemStack);
@@ -133,9 +135,10 @@ public class DataManager {
 
         JsonObject jsonObject = JsonParser.parseString(Objects.requireNonNull(dataContainer.get(WARDROBE_KEY, PersistentDataType.STRING))).getAsJsonObject();
 
+
         Map<Integer, WardrobeContent> contentMap = new HashMap<>();
 
-        for(int slot = 1; slot < 9; slot++){
+        for(int slot = 0; slot < 9; slot++){
             String slot_key = "slot_"+slot;
 
             if(!jsonObject.has(slot_key)) continue;

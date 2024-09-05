@@ -29,20 +29,19 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class v1_21_R1 implements Compat{
+    public final Map<Integer, Map<Integer, Entity>> passengers = new HashMap<>();
 
     @Override
     public HoloTextDisplay createTextDisplay(List<Player> players, Location location, float yaw, float pitch) {
-        return new HoloDisplayText(players, location, yaw, pitch);
+        return new HoloDisplayText(players, location, yaw, pitch, this);
     }
 
     @Override
     public HoloItemDisplay createItemDisplay(List<Player> players, Location location, float yaw, float pitch) {
-        return new HoloDisplayItem(players, location, yaw, pitch);
+        return new HoloDisplayItem(players, location, yaw, pitch, this);
     }
 
     @Override
@@ -56,6 +55,38 @@ public class v1_21_R1 implements Compat{
                         String name = packet.getClass().getName();
                         if(name.endsWith("PacketPlayOutSetSlot") || name.endsWith("ClientboundContainerSetSlotPacket")){
                             onPacketSend(player, packet);
+                        }
+
+                        if(name.endsWith("ClientboundSetPassengersPacket") || name.endsWith("PacketPlayOutMount")){
+                            boolean isPaper = name.endsWith("ClientboundSetPassengersPacket");
+                            String vehicleFieldName = isPaper ? "vehicle" : "a";
+                            String passengersFieldName = isPaper ? "passengers" : "b";
+
+                            try {
+                                Field targetField = msg.getClass().getDeclaredField(vehicleFieldName);
+                                targetField.setAccessible(true);
+                                int targetID = targetField.getInt(msg);
+
+                                Field passengersField = msg.getClass().getDeclaredField(passengersFieldName);
+                                passengersField.setAccessible(true);
+                                int[] passengersID = (int[]) passengersField.get(msg);
+
+                                Map<Integer, Entity> entities = passengers.getOrDefault(targetID, new HashMap<>());
+
+                                int[] newPassengersID = new int[passengersID.length + entities.size()];
+
+                                System.arraycopy(passengersID, 0, newPassengersID, 0, passengersID.length);
+
+                                int index = passengersID.length;
+                                for (Integer entityID : entities.keySet()) {
+                                    newPassengersID[index++] = entityID;
+                                }
+
+                                passengersField.set(msg, newPassengersID);
+
+                            } catch (Exception exception) {
+                                exception.printStackTrace();
+                            }
                         }
                     }
                     super.write(ctx, msg, promise);
@@ -99,8 +130,10 @@ public class v1_21_R1 implements Compat{
         private final Display.TextDisplay textDisplay;
         private Location location;
         private final Packet<?> spawnPacket;
+        private final v1_21_R1 manager;
 
-        public HoloDisplayText(List<Player> players, Location location, float yaw, float pitch){
+        public HoloDisplayText(List<Player> players, Location location, float yaw, float pitch, v1_21_R1 manager){
+            this.manager = manager;
             this.players = players;
             this.location = location;
             WorldServer world = ((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle();
@@ -244,6 +277,11 @@ public class v1_21_R1 implements Compat{
         public void mount(Player target) {
             Entity entityPlayer = ((CraftPlayer)target).getHandle();
             List<Entity> list = new ArrayList<>(entityPlayer.p);
+            List<Entity> backup = new ArrayList<>(list);
+            Map<Integer, Entity> entities = manager.passengers.getOrDefault(target.getEntityId(), new HashMap<>());
+            entities.put(textDisplay.an(), textDisplay);
+            manager.passengers.put(target.getEntityId(), entities);
+
             if(!list.contains(textDisplay))
                 list.add(textDisplay);
 
@@ -253,6 +291,8 @@ public class v1_21_R1 implements Compat{
             players.forEach(player -> {
                 ((CraftPlayer)player).getHandle().c.b(packet);
             });
+
+            entityPlayer.p = ImmutableList.copyOf(backup);
         }
 
         @Override
@@ -284,8 +324,10 @@ public class v1_21_R1 implements Compat{
         private final Display.ItemDisplay itemDisplay;
         private Location location;
         private final Packet<?> spawnPacket;
+        private final v1_21_R1 manager;
 
-        public HoloDisplayItem(List<Player> players, Location location, float yaw, float pitch){
+        public HoloDisplayItem(List<Player> players, Location location, float yaw, float pitch, v1_21_R1 manager){
+            this.manager = manager;
             this.players = players;
             this.location = location;
             WorldServer world = ((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle();
@@ -369,6 +411,11 @@ public class v1_21_R1 implements Compat{
         public void mount(Player target) {
             Entity entityPlayer = ((CraftPlayer)target).getHandle();
             List<Entity> list = new ArrayList<>(entityPlayer.p);
+            List<Entity> backup = new ArrayList<>(list);
+            Map<Integer, Entity> entities = manager.passengers.getOrDefault(target.getEntityId(), new HashMap<>());
+            entities.put(itemDisplay.an(), itemDisplay);
+            manager.passengers.put(target.getEntityId(), entities);
+
             if(!list.contains(itemDisplay))
                 list.add(itemDisplay);
 
@@ -378,6 +425,8 @@ public class v1_21_R1 implements Compat{
             players.forEach(player -> {
                 ((CraftPlayer)player).getHandle().c.b(packet);
             });
+
+            entityPlayer.p = ImmutableList.copyOf(backup);
         }
 
         @Override

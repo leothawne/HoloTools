@@ -52,6 +52,8 @@ public class HoloListener implements Listener {
 
     @EventHandler
     public void onPlayerTeleport(PlayerTeleportEvent event) {
+        if(event.getPlayer().getName().equalsIgnoreCase("FavioMC19"))
+            plugin.getUtils().debug(String.format("TeleportEvent| cancelled: %s, player: %s, isAsync: %s", event.isCancelled(), event.getPlayer().getName(), event.isAsynchronous()));
         plugin.getHoloManager().update(event.getPlayer(), 1L);
     }
 

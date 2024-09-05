@@ -24,10 +24,27 @@ public class Commands implements CommandExecutor {
         switch (args[0].toLowerCase()){
             case "give" -> giveCommand(sender, args);
             case "reload" -> reloadCommand(sender);
-
+            case "debug" -> debugCommand(sender);
+            case "test" -> testCommand(sender);
         }
 
         return true;
+    }
+
+    private void testCommand(CommandSender sender) {
+        if(!(sender instanceof Player player)) return;
+        player.teleport(player.getLocation().clone().add(0, 2, 0));
+        sender.sendMessage("test");
+    }
+
+    private void debugCommand(CommandSender sender) {
+        if(!(sender.hasPermission("holotools.command.debug"))){
+            sender.sendMessage(plugin.getUtils().color(plugin.getLangManager().NO_PERMISSION));
+            return;
+        }
+
+        boolean enabled = plugin.getUtils().toggleDebug(sender);
+        sender.sendMessage(plugin.getUtils().color(enabled ? "&aDebug mode enabled!" : "&cDebug mode disabled!"));
     }
 
     private void giveCommand(CommandSender sender, String[] args){

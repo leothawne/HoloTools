@@ -1,6 +1,8 @@
 package net.kokoricraft.holotools.managers;
 
 import net.kokoricraft.holotools.HoloTools;
+import net.kokoricraft.holotools.enums.HoloType;
+import net.kokoricraft.holotools.objects.colors.HoloPanelsColors;
 import net.kokoricraft.holotools.objects.halo.Holo;
 import net.kokoricraft.holotools.objects.holocrafter.HoloCrafter;
 import net.kokoricraft.holotools.objects.holowardrobe.HoloWardrobe;
@@ -14,6 +16,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class HoloManager {
@@ -102,6 +105,11 @@ public class HoloManager {
 
     public Holo getHolo(Player player){
         return opened.get(player);
+    }
+
+    public HoloPanelsColors getHoloColor(Player player, HoloType type){
+        List<HoloPanelsColors> colors =  type == HoloType.HOLOCRAFTER ? plugin.getConfigManager().CRAFTER_PANELS_COLORS :  plugin.getConfigManager().WARDROBE_PANELS_COLORS;
+       return colors.stream().filter(color -> color.canUse(player)).findFirst().orElse(null);
     }
 
     public void update(Player player, long time){

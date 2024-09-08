@@ -3,6 +3,8 @@ package net.kokoricraft.holotools.enums;
 
 import net.kokoricraft.holotools.utils.objects.HoloColor;
 
+import java.awt.*;
+
 public enum HoloColors {
     DARK(HoloColor.fromARGB(150, 25, 167, 210)),
     DARK_SELECTED(HoloColor.fromARGB(200, 40, 186, 230)),

@@ -2,9 +2,13 @@ package net.kokoricraft.holotools.objects.holocrafter;
 
 import net.kokoricraft.holotools.HoloTools;
 import net.kokoricraft.holotools.enums.HoloColors;
+import net.kokoricraft.holotools.enums.HoloType;
 import net.kokoricraft.holotools.interfaces.HoloBase;
+import net.kokoricraft.holotools.objects.colors.DualColor;
+import net.kokoricraft.holotools.objects.colors.HoloPanelsColors;
 import net.kokoricraft.holotools.objects.halo.HaloSlot;
 import net.kokoricraft.holotools.objects.halo.Holo;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -18,17 +22,22 @@ public class HoloCrafter extends Holo implements HoloBase {
     private final Map<Integer, HoloCrafterSlot> crafterSlots = new HashMap<>();
     private final HoloHover hover;
     private Recipe lasted_recipe;
+    private final HoloPanelsColors colors;
 
     public HoloCrafter(Player player, Map<Integer, Recipe> recipeMap, ItemStack itemStack) {
         super(8, -1.5f, itemStack);
         this.player = player;
 
+        colors = plugin.getHoloManager().getHoloColor(player, HoloType.HOLOCRAFTER);
+
         for(int key : slots.keySet()){
             HaloSlot slot = slots.get(key);
-            boolean second = key % 2 == 0;
-            slot.setColor(second ? HoloColors.DARK.getColor() : HoloColors.WHITE.getColor());
 
-            HoloCrafterSlot crafterSlot = new HoloCrafterSlot(slot, recipeMap.get(key), player, second);
+            DualColor dualColor = colors.getColor(slot.getSlot());
+
+            slot.setColor(dualColor.unselected());
+
+            HoloCrafterSlot crafterSlot = new HoloCrafterSlot(slot, recipeMap.get(key), player);
 
             crafterSlots.put(key, crafterSlot);
         }
@@ -45,7 +54,7 @@ public class HoloCrafter extends Holo implements HoloBase {
 
         if(from != null){
             HoloCrafterSlot holoCrafterSlot = crafterSlots.get(fromSlot);
-            from.setColor(holoCrafterSlot.isSecond() ? HoloColors.DARK.getColor() : HoloColors.WHITE.getColor());
+            from.setColor(colors.getColor(fromSlot).unselected());
             if(fromSlot != 0){
                 hover.setAir();
                 holoCrafterSlot.setText(" ");
@@ -54,7 +63,7 @@ public class HoloCrafter extends Holo implements HoloBase {
 
         if(to != null){
             HoloCrafterSlot holoCrafterSlot = crafterSlots.get(toSlot);
-            to.setColor(holoCrafterSlot.isSecond() ? HoloColors.DARK_SELECTED.getColor() : HoloColors.WHITE_SELECTED.getColor());
+            to.setColor(colors.getColor(toSlot).selected());
             if(toSlot != 0){
                 if(holoCrafterSlot.getRecipe() != null){
                     hover.setRecipe(holoCrafterSlot.getRecipe());

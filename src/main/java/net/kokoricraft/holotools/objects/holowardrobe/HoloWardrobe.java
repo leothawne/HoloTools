@@ -2,7 +2,9 @@ package net.kokoricraft.holotools.objects.holowardrobe;
 
 import net.kokoricraft.holotools.HoloTools;
 import net.kokoricraft.holotools.enums.HoloColors;
+import net.kokoricraft.holotools.enums.HoloType;
 import net.kokoricraft.holotools.interfaces.HoloBase;
+import net.kokoricraft.holotools.objects.colors.HoloPanelsColors;
 import net.kokoricraft.holotools.objects.halo.HaloSlot;
 import net.kokoricraft.holotools.objects.halo.Holo;
 import org.bukkit.Bukkit;
@@ -15,16 +17,17 @@ import java.util.Map;
 public class HoloWardrobe extends Holo implements HoloBase {
     private final HoloTools plugin = HoloTools.getInstance();
     private final Map<Integer, HoloWardrobeSlot> wardrobeSlots = new HashMap<>();
+    private final HoloPanelsColors colors;
     public HoloWardrobe(Player player, ItemStack itemStack, Map<Integer, WardrobeContent> contentMap) {
         super(8, -1.5f, itemStack);
         this.player = player;
+        this.colors = plugin.getHoloManager().getHoloColor(player, HoloType.HOLOWARDROBE);
 
         for(int key : slots.keySet()){
             HaloSlot slot = slots.get(key);
-            boolean second = key % 2 == 0;
-            slot.setColor(second ? HoloColors.DARK.getColor() : HoloColors.WHITE.getColor());
+            slot.setColor(colors.getColor(key).unselected());
 
-            HoloWardrobeSlot wardrobeSlot = new HoloWardrobeSlot(slot, contentMap.get(key), player, second);
+            HoloWardrobeSlot wardrobeSlot = new HoloWardrobeSlot(slot, contentMap.get(key), player);
 
             wardrobeSlots.put(key, wardrobeSlot);
         }
@@ -38,14 +41,11 @@ public class HoloWardrobe extends Holo implements HoloBase {
         HaloSlot to = slots.get(toSlot);
 
         if(from != null){
-            HoloWardrobeSlot holoCrafterSlot = wardrobeSlots.get(fromSlot);
-            from.setColor(holoCrafterSlot.isSecond() ? HoloColors.DARK.getColor() : HoloColors.WHITE.getColor());
-
+            from.setColor(colors.getColor(fromSlot).unselected());
         }
 
         if(to != null){
-            HoloWardrobeSlot holoCrafterSlot = wardrobeSlots.get(toSlot);
-            to.setColor(holoCrafterSlot.isSecond() ? HoloColors.DARK_SELECTED.getColor() : HoloColors.WHITE_SELECTED.getColor());
+            to.setColor(colors.getColor(toSlot).selected());
         }
     }
 

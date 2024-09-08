@@ -23,16 +23,14 @@ public class HoloCrafterSlot {
     private final  static float text_y = 0.2f;
     private Recipe recipe;
     private final Player player;
-    private final boolean second;
     private final boolean isCraftingTable;
     private HoloTextDisplay textDisplay;
     private HoloItemDisplay display;
 
-    public HoloCrafterSlot(HaloSlot haloSlot, Recipe recipe, Player player, boolean second){
+    public HoloCrafterSlot(HaloSlot haloSlot, Recipe recipe, Player player){
         this.haloSlot = haloSlot;
         this.recipe = recipe;
         this.player = player;
-        this.second = second;
         this.isCraftingTable = haloSlot.getSlot() == 0;
     }
 
@@ -115,9 +113,5 @@ public class HoloCrafterSlot {
 
         display.setViewRange(recipe == null ? 0 : 20);
         display.update();
-    }
-
-    public boolean isSecond(){
-        return second;
     }
 }

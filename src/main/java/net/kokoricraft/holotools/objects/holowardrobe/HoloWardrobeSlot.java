@@ -16,16 +16,14 @@ public class HoloWardrobeSlot {
     private final HaloSlot slot;
     private WardrobeContent content;
     private final Player player;
-    private final boolean second;
     private final Map<EquipmentSlot, HoloItemDisplay> entities = new HashMap<>();
     private final float separation = 0.5f;
     private final float y_translation = 1.9f - 0.3f;
 
-    public HoloWardrobeSlot(HaloSlot slot, WardrobeContent content, Player player, boolean second){
+    public HoloWardrobeSlot(HaloSlot slot, WardrobeContent content, Player player){
         this.slot = slot;
         this.content = content;
         this.player = player;
-        this.second = second;
     }
 
     public void spawnContent(){
@@ -123,9 +121,6 @@ public class HoloWardrobeSlot {
         return content;
     }
 
-    public boolean isSecond(){
-        return second;
-    }
     private float getYaw(){
         return (45 * slot.getSlot() + slot.getInitialYaw());
     }

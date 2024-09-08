@@ -9,29 +9,29 @@ item:
 
 colors:
   default:
-    permission_enabled: false
-    permission: "holotools.crafter.color.default"
+    need_permission: false
+    permission: "holotools.holocrafter.color.default"
     slots:
-      default_slot: blue
-      slot_0: light_blue
-      slot_2: light_blue
-      slot_4: light_blue
-      slot_6: light_blue
+      default_slot: light_blue
+      slot_0: blue
+      slot_2: blue
+      slot_4: blue
+      slot_6: blue
 
 
 colors_lists:
   blue:
     unselected:
-      hex: #ffffff
-      opacity: 3
+      hex: "#19a7d2"
+      alpha: 150
     selected:
-      hex: #ffffff
-      opacity: 3
+      hex: "#28bae6"
+      alpha: 200
 
   light_blue:
     unselected:
-      hex: #ffffff
-      opacity: 3
+      hex: "#24dce5"
+      alpha: 150
     selected:
-      hex: #ffffff
-      opacity: 3
+      hex: "#5be4ec"
+      alpha: 200

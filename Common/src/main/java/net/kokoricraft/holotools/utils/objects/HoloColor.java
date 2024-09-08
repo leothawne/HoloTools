@@ -1,6 +1,8 @@
 package net.kokoricraft.holotools.utils.objects;
 
 import com.google.common.base.Preconditions;
+
+import java.awt.*;
 import java.util.Objects;
 
 public final class HoloColor {
@@ -54,6 +56,22 @@ public final class HoloColor {
     public static HoloColor fromBGR(int bgr) throws IllegalArgumentException {
         Preconditions.checkArgument((bgr >> 24) == 0, "Extrenuous data in: %s", bgr);
         return fromBGR(bgr >> 16 & BIT_MASK, bgr >> 8 & BIT_MASK, bgr & BIT_MASK);
+    }
+
+    public static HoloColor fromHex(String hexColor, int opacity){
+        if(hexColor == null || !hexColor.matches("#[0-9a-fA-F]{6}"))
+            throw new IllegalArgumentException("Invalid hex color format. Must be #RRGGBB.");
+
+        Color color = Color.decode(hexColor);
+
+        int red = color.getRed();
+        int green = color.getGreen();
+        int blue = color.getBlue();
+
+        if(opacity < 0 || opacity > 255)
+            throw new IllegalArgumentException("Opacity must be between 0 and 255.");
+
+        return fromARGB(opacity, red, green, blue);
     }
 
     private HoloColor(int red, int green, int blue) {

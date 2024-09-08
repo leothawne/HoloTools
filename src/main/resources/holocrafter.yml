@@ -6,3 +6,32 @@ item:
   material: "PLAYER_HEAD"
   texture: "http://textures.minecraft.net/texture/58e992020c2506864e561c272220645ea9b32f09dffd8a29d7af2fa28932c96a"
   custom_model_id: 0
+
+colors:
+  default:
+    permission_enabled: false
+    permission: "holotools.crafter.color.default"
+    slots:
+      default_slot: blue
+      slot_0: light_blue
+      slot_2: light_blue
+      slot_4: light_blue
+      slot_6: light_blue
+
+
+colors_lists:
+  blue:
+    unselected:
+      hex: #ffffff
+      opacity: 3
+    selected:
+      hex: #ffffff
+      opacity: 3
+
+  light_blue:
+    unselected:
+      hex: #ffffff
+      opacity: 3
+    selected:
+      hex: #ffffff
+      opacity: 3

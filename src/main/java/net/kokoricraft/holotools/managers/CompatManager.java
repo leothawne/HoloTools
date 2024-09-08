@@ -18,9 +18,9 @@ public class CompatManager {
     private final Compat compat;
     private final Map<String, String> versions = new HashMap<>(){
         {
-            this.put("1.21", "v1_21_R1");
-            this.put("1.20.6", "v1_20_R4");
-            this.put("1.21.1", "v1_21_R1");
+            this.put("1.21", "v1_21_R1OLD");
+            this.put("1.20.6", "v1_20_R2");
+            this.put("1.21.1", "v1_21_R1OLD");
         }
     };
 

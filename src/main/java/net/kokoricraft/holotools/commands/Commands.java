@@ -1,11 +1,14 @@
 package net.kokoricraft.holotools.commands;
 
 import net.kokoricraft.holotools.HoloTools;
+import net.kokoricraft.holotools.version.HoloItemDisplay;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.List;
 
 public class Commands implements CommandExecutor {
     private final HoloTools plugin;
@@ -25,16 +28,39 @@ public class Commands implements CommandExecutor {
             case "give" -> giveCommand(sender, args);
             case "reload" -> reloadCommand(sender);
             case "debug" -> debugCommand(sender);
-            case "test" -> testCommand(sender);
+            case "test" -> testCommand(sender, args);
         }
 
         return true;
     }
 
-    private void testCommand(CommandSender sender) {
-        if(!(sender instanceof Player player)) return;
-        player.teleport(player.getLocation().clone().add(0, 2, 0));
-        sender.sendMessage("test");
+    private HoloItemDisplay holo;
+
+    private void testCommand(CommandSender sender, String[] args) {
+//        Player player = (Player)sender;
+//        v1_21_R1 test = (v1_21_R1) plugin.getCompatManager().getCompat();
+//        boolean enable = (args.length != 1);
+//
+//        if(enable){
+//            if(holo != null){
+//                holo.remove();
+//            }
+//            holo = plugin.getCompatManager().createItemDisplay(List.of(player), player.getLocation(), 0, 0);
+//            holo.setScale(.3f, .3f, .3f);
+//            holo.setItemStack(new ItemStack(Material.DIAMOND_HELMET));
+//            holo.setBillboard(Display.Billboard.VERTICAL);
+//            holo.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.HEAD);
+//            holo.setTranslation(0f, 0f, 1.3f);
+//            holo.update();
+//        }else {
+//            holo.remove();
+//            holo = null;
+//        }
+//        test.test(player, args.length == 1, holo);
+//
+//
+//        sender.sendMessage("yap creative: "+ (args.length == 1));
+
     }
 
     private void debugCommand(CommandSender sender) {

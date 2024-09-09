@@ -1,6 +1,7 @@
 package net.kokoricraft.holotools.objects.holowardrobe;
 
 import net.kokoricraft.holotools.HoloTools;
+import net.kokoricraft.holotools.enums.HoloActionType;
 import net.kokoricraft.holotools.enums.HoloColors;
 import net.kokoricraft.holotools.enums.HoloType;
 import net.kokoricraft.holotools.interfaces.HoloBase;
@@ -74,6 +75,11 @@ public class HoloWardrobe extends Holo implements HoloBase {
                 loadArmor.apply(player);
             plugin.getDataManager().saveHoloWardrobe(itemStack, this, "swap wardrobe armor");
         }
+    }
+
+    @Override
+    public void onAction(HoloActionType type) {
+
     }
 
     @Override

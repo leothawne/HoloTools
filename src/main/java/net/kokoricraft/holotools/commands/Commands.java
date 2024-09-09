@@ -2,9 +2,16 @@ package net.kokoricraft.holotools.commands;
 
 import net.kokoricraft.holotools.HoloTools;
 import net.kokoricraft.holotools.version.HoloItemDisplay;
+import net.kokoricraft.holotools.version.HoloTextDisplay;
+import net.kokoricraft.holotools.version.v1_21_R1;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Display;
+import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -37,10 +44,11 @@ public class Commands implements CommandExecutor {
     private HoloItemDisplay holo;
 
     private void testCommand(CommandSender sender, String[] args) {
-//        Player player = (Player)sender;
-//        v1_21_R1 test = (v1_21_R1) plugin.getCompatManager().getCompat();
+        Player player = (Player)sender;
+        v1_21_R1 test = (v1_21_R1) plugin.getCompatManager().getCompat();
 //        boolean enable = (args.length != 1);
 //
+//        ItemDisplay armorStand = player.getWorld().spawn(player.getLocation(), ItemDisplay.class);
 //        if(enable){
 //            if(holo != null){
 //                holo.remove();
@@ -56,11 +64,23 @@ public class Commands implements CommandExecutor {
 //            holo.remove();
 //            holo = null;
 //        }
-//        test.test(player, args.length == 1, holo);
-//
-//
+//        test.test(player, args.length == 1, holo, armorStand);
+
+
 //        sender.sendMessage("yap creative: "+ (args.length == 1));
 
+        //HoloTextDisplay holo_1 = plugin.getCompatManager().createTextDisplay(List.of(player), player.getLocation(), 0, 0);
+
+
+
+
+        test.test2(player);
+
+        Bukkit.getScheduler().runTaskLater(plugin, () ->{
+            test.test2(player);
+            sender.sendMessage("test2");
+        }, 20 * 5);
+        sender.sendMessage("test");
     }
 
     private void debugCommand(CommandSender sender) {

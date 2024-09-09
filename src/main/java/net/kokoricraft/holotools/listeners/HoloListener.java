@@ -1,8 +1,10 @@
 package net.kokoricraft.holotools.listeners;
 
 import net.kokoricraft.holotools.HoloTools;
+import net.kokoricraft.holotools.enums.HoloActionType;
 import net.kokoricraft.holotools.events.InventoryUpdateEvent;
 import net.kokoricraft.holotools.objects.halo.Holo;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -110,5 +112,19 @@ public class HoloListener implements Listener {
     @EventHandler
     public void onInventoryUpdate(InventoryUpdateEvent event){
         plugin.getHoloManager().update(event.getPlayer(), 1L);
+    }
+    @EventHandler
+    public void onPlayerSneak(PlayerToggleSneakEvent event){
+        Holo holo = plugin.getHoloManager().getHolo(event.getPlayer());
+        if(holo == null) return;
+        holo.onAction(HoloActionType.SNEAK);
+    }
+
+    @EventHandler
+    public void onPlayerJump(PlayerStatisticIncrementEvent event){
+        Holo holo = plugin.getHoloManager().getHolo(event.getPlayer());
+        if(holo == null || !event.getStatistic().name().equals("JUMP")) return;
+
+        holo.onAction(HoloActionType.JUMP);
     }
 }

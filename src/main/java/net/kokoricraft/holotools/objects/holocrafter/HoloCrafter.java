@@ -1,6 +1,7 @@
 package net.kokoricraft.holotools.objects.holocrafter;
 
 import net.kokoricraft.holotools.HoloTools;
+import net.kokoricraft.holotools.enums.HoloActionType;
 import net.kokoricraft.holotools.enums.HoloColors;
 import net.kokoricraft.holotools.enums.HoloType;
 import net.kokoricraft.holotools.interfaces.HoloBase;
@@ -113,6 +114,18 @@ public class HoloCrafter extends Holo implements HoloBase {
             hover.setRecipe(lasted_recipe);
             crafterSlot.setText(plugin.getUtils().color(plugin.getLangManager().CRAFTER_CLICK_TO_CRAFT));
             plugin.getDataManager().saveHoloCrafter(itemStack, this, "save recipe");
+        }
+    }
+
+    @Override
+    public void onAction(HoloActionType type){
+        HoloCrafterSlot crafterSlot = crafterSlots.get(getSlot());
+        if(type != HoloActionType.SNEAK) return;
+        boolean isSneaking = !player.isSneaking();
+
+        if(crafterSlot.getRecipe() != null){
+            crafterSlot.setText(plugin.getUtils().color(isSneaking ?
+                    plugin.getLangManager().CRAFTER_CLICK_TO_REMOVE : plugin.getLangManager().CRAFTER_CLICK_TO_CRAFT));
         }
     }
 

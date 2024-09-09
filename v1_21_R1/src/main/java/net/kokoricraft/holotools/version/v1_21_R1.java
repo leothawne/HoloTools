@@ -4,8 +4,11 @@ import com.mojang.math.Transformation;
 import io.netty.channel.*;
 import net.kokoricraft.holotools.events.InventoryUpdateEvent;
 import net.kokoricraft.holotools.utils.objects.HoloColor;
+import net.minecraft.core.BlockPosition;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.custom.*;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.server.level.WorldServer;
@@ -15,7 +18,6 @@ import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.level.EnumGamemode;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_21_R1.CraftWorld;
@@ -66,6 +68,20 @@ public class v1_21_R1 implements Compat{
 
                     super.write(ctx, msg, promise);
                 }
+
+                @Override
+                public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+                    if(msg instanceof Packet<?> packet){
+                        String name = packet.getClass().getName();
+
+                        if(name.endsWith("PacketPlayInLook")) {
+                            PacketPlayInFlying.PacketPlayInLook awa = (PacketPlayInFlying.PacketPlayInLook)msg;
+                            //Bukkit.broadcastMessage("rotation: "+awa.d+" "+awa.e);
+                        }
+                    }
+
+                    super.channelRead(ctx, msg);
+                }
             });
         }catch (Exception exception){
             exception.printStackTrace();
@@ -73,24 +89,59 @@ public class v1_21_R1 implements Compat{
     }
 
 
-    public void test(Player player, boolean creative, HoloItemDisplay holo){
-        boolean enabled = !creative;
-
-        if(enabled){
-            PacketPlayOutGameStateChange packet = new PacketPlayOutGameStateChange(PacketPlayOutGameStateChange.e, EnumGamemode.d.a());
-            sendPacket(List.of(player), packet);
-
-
-            PacketPlayOutCamera camera = new PacketPlayOutCamera(((HoloDisplayItem)holo).getEntity());
-            sendPacket(List.of(player), camera);
-        }else{
-            PacketPlayOutGameStateChange packet = new PacketPlayOutGameStateChange(PacketPlayOutGameStateChange.e,EnumGamemode.b.a());
-            sendPacket(List.of(player), packet);
-            Entity armor = ((CraftPlayer)player).getHandle();
-            PacketPlayOutCamera camera = new PacketPlayOutCamera(armor);
-            sendPacket(List.of(player), camera);
+    public void test(Player player, boolean creative, HoloItemDisplay holo, ItemDisplay armorStand){
+        HoloDisplayItem entity = (HoloDisplayItem) createItemDisplay(List.of(player), player.getLocation(), 0, 0);
+        try{
+            entity.setScale(3, 3, 3);
+            entity.mount(player);
+            entity.mount(player);
+            entity.mount(player);
+            entity.mount(player);
+            entity.mount(player);
+            entity.mount(player);
+            entity.mount(player);
+            entity.update();
+            PacketPlayOutMount mount = new PacketPlayOutMount(((CraftPlayer)player).getHandle());
+            Field passengers = mount.getClass().getDeclaredField("c");
+            passengers.setAccessible(true);
+            passengers.set(mount, new int[]{getEntityID(entity.getEntity()), getEntityID(entity.getEntity()), getEntityID(entity.getEntity()), getEntityID(entity.getEntity()), getEntityID(entity.getEntity()), getEntityID(entity.getEntity())});
+            sendPacket(List.of(player), mount);
+        }catch (Exception exception){
+            exception.printStackTrace();
         }
 
+//        boolean enabled = !creative;
+//        armorStand.addPassenger(player);
+//
+//        if(enabled){
+//            PacketPlayOutGameStateChange packet = new PacketPlayOutGameStateChange(PacketPlayOutGameStateChange.e, EnumGamemode.d.a());
+//            sendPacket(List.of(player), packet);
+//
+//            PacketPlayOutCamera camera = new PacketPlayOutCamera(((HoloDisplayItem)holo).getEntity());
+//            sendPacket(List.of(player), camera);
+//            mount(List.of(player), player, ((HoloDisplayItem)holo).getEntity());
+//        }else{
+//            PacketPlayOutGameStateChange packet = new PacketPlayOutGameStateChange(PacketPlayOutGameStateChange.e,EnumGamemode.b.a());
+//            sendPacket(List.of(player), packet);
+//            Entity armor = ((CraftPlayer)player).getHandle();
+//            PacketPlayOutCamera camera = new PacketPlayOutCamera(armor);
+//            sendPacket(List.of(player), camera);
+//        }
+
+    }
+
+    public void test2(Player player){
+        GameTestAddMarkerDebugPayload addMarker = new GameTestAddMarkerDebugPayload(asd(player),
+                0x80ffcccc, "Puto el que lea", 0xFFFFFF);
+
+        ClientboundCustomPayloadPacket packet = new ClientboundCustomPayloadPacket(addMarker);
+
+        sendPacket(List.of(player), packet);
+    }
+
+    private BlockPosition asd(Player player){
+        Location location = player.getLocation();
+        return new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ());
     }
 
     private ChannelPipeline getPipeline(CraftPlayer player){

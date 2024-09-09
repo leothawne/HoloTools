@@ -14,6 +14,7 @@ import net.kokoricraft.holotools.utils.Metrics;
 import net.kokoricraft.holotools.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 

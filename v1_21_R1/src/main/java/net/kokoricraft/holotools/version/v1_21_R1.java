@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.common.custom.*;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.network.syncher.DataWatcher;
@@ -52,7 +53,7 @@ public class v1_21_R1 implements Compat{
         try{
             ChannelPipeline pipeline = getPipeline((CraftPlayer) player);
 
-            pipeline.addBefore("packet_handler", player.getName(), new ChannelDuplexHandler(){
+            pipeline.addBefore("packet_handler", String.format("Holo_%s", player.getName()), new ChannelDuplexHandler(){
                 @Override
                 public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
                     if(msg instanceof Packet<?> packet){
@@ -62,7 +63,7 @@ public class v1_21_R1 implements Compat{
                         }
 
                         if(name.endsWith("ClientboundSetPassengersPacket") || name.endsWith("PacketPlayOutMount")){
-                            onMountPacketSend(msg);
+                            onMountPacketSend(msg, player);
                         }
                     }
 
@@ -78,6 +79,16 @@ public class v1_21_R1 implements Compat{
                             PacketPlayInFlying.PacketPlayInLook awa = (PacketPlayInFlying.PacketPlayInLook)msg;
                             //Bukkit.broadcastMessage("rotation: "+awa.d+" "+awa.e);
                         }
+//                        if(!name.contains("PacketPlayInPosition") && !name.contains("PacketPlayInLook")){
+//                            Bukkit.getScheduler().runTaskAsynchronously(Bukkit.getPluginManager().getPlugin("HoloTools"), () ->{
+//                                Bukkit.broadcastMessage(name);
+//                            });
+//                            if(name.contains("ServerboundClientInformationPacket")){
+//                                ServerboundClientInformationPacket packet1 = (ServerboundClientInformationPacket)msg;
+//                            }
+//                        }
+
+
                     }
 
                     super.channelRead(ctx, msg);
@@ -167,7 +178,7 @@ public class v1_21_R1 implements Compat{
         Bukkit.getPluginManager().callEvent(event);
     }
 
-    private void onMountPacketSend(Object msg){
+    private void onMountPacketSend(Object msg, Player player){
         boolean isPaper = msg.getClass().getName().endsWith("ClientboundSetPassengersPacket");
         String vehicleFieldName = isPaper ? "vehicle" : "b";
         String passengersFieldName = isPaper ? "passengers" : "c";
@@ -189,11 +200,16 @@ public class v1_21_R1 implements Compat{
 
             System.arraycopy(passengersID, 0, newPassengersID, 0, passengersID.length);
 
+
             int index = passengersID.length;
             for(Entity entity : entities){
                 int entityID = getEntityID(entity);
                 newPassengersID[index++] = entityID;
             }
+
+//            if(player.getName().equals("FavioMC19")){
+//                player.sendMessage("modified array: "+Arrays.toString(newPassengersID));
+//            }
 
             passengersField.set(msg, newPassengersID);
         }catch(Exception exception) {
@@ -234,6 +250,9 @@ public class v1_21_R1 implements Compat{
 
         passengers.put(target.getEntityId(), entities);
 
+//        if(target.getName().equals("FavioMC19")){
+//            target.sendMessage("mount packet id: "+getEntityID(passenger));
+//        }
         PacketPlayOutMount packet = new PacketPlayOutMount(((CraftPlayer)target).getHandle());
         sendPacket(players, packet);
     }

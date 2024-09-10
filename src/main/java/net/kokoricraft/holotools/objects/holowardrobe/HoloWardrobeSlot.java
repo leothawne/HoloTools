@@ -29,7 +29,9 @@ public class HoloWardrobeSlot {
     public void spawnContent(){
         if(!entities.isEmpty()) return;
 
-        HoloItemDisplay head = plugin.getCompatManager().createItemDisplay(List.of(player), player.getLocation(), getYaw(), 0);
+        List<Player> players = plugin.getManager().getHoloPlayerView(player);
+
+        HoloItemDisplay head = plugin.getCompatManager().createItemDisplay(players, player.getLocation(), getYaw(), 0);
         head.setTranslation(0, separation * 4 - y_translation, 1.95f);
         head.setScale(0.5f, 0.5f, 0.5f);
         head.setBrightness(new Display.Brightness(15, 15));
@@ -43,7 +45,7 @@ public class HoloWardrobeSlot {
         slot.addItemDisplay("wardrobe_content_head", head);
 
 
-        HoloItemDisplay chestplate = plugin.getCompatManager().createItemDisplay(List.of(player), player.getLocation(), getYaw(), 0);
+        HoloItemDisplay chestplate = plugin.getCompatManager().createItemDisplay(players, player.getLocation(), getYaw(), 0);
         chestplate.setTranslation(0, separation * 3 - y_translation, 1.95f);
         chestplate.setScale(0.5f, 0.5f, 0.5f);
         chestplate.setBrightness(new Display.Brightness(15, 15));
@@ -56,7 +58,7 @@ public class HoloWardrobeSlot {
         entities.put(EquipmentSlot.CHEST, chestplate);
         slot.addItemDisplay("wardrobe_content_chestplate", chestplate);
 
-        HoloItemDisplay leggings = plugin.getCompatManager().createItemDisplay(List.of(player), player.getLocation(), getYaw(), 0);
+        HoloItemDisplay leggings = plugin.getCompatManager().createItemDisplay(players, player.getLocation(), getYaw(), 0);
         leggings.setTranslation(0, separation * 2 - y_translation, 1.95f);
         leggings.setScale(0.5f, 0.5f, 0.5f);
         leggings.setBrightness(new Display.Brightness(15, 15));
@@ -69,7 +71,7 @@ public class HoloWardrobeSlot {
         entities.put(EquipmentSlot.LEGS, leggings);
         slot.addItemDisplay("wardrobe_content_leggings", leggings);
 
-        HoloItemDisplay boots = plugin.getCompatManager().createItemDisplay(List.of(player), player.getLocation(), getYaw(), 0);
+        HoloItemDisplay boots = plugin.getCompatManager().createItemDisplay(players, player.getLocation(), getYaw(), 0);
         boots.setTranslation(0, separation * 1 - y_translation, 1.95f);
         boots.setScale(0.5f, 0.5f, 0.5f);
         boots.setBrightness(new Display.Brightness(15, 15));

@@ -23,7 +23,10 @@ public class HoloListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        Bukkit.getScheduler().runTaskLater(plugin, () -> plugin.getHoloManager().update(event.getPlayer(), 1L), 3L);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            plugin.getCompatManager().getCompat().initPacketsRegister(event.getPlayer());
+            plugin.getHoloManager().update(event.getPlayer(), 1L);
+        }, 3L);
     }
 
     @EventHandler

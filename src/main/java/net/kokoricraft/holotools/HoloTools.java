@@ -74,7 +74,6 @@ public final class HoloTools extends JavaPlugin {
 
     private void initListeners(){
         PluginManager pm = Bukkit.getPluginManager();
-        pm.registerEvents(new PlayerListener(this), this);
         pm.registerEvents(new HoloListener(this), this);
         pm.registerEvents(new HoloCrafterListener(this), this);
     }

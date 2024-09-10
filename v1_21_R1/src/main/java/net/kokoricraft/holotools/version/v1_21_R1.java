@@ -8,7 +8,6 @@ import net.minecraft.core.BlockPosition;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.common.custom.*;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.network.syncher.DataWatcher;
@@ -207,7 +206,7 @@ public class v1_21_R1 implements Compat{
                 newPassengersID[index++] = entityID;
             }
 
-//            if(player.getName().equals("FavioMC19")){
+//            if(!player.getName().equals("FavioMC19")){
 //                player.sendMessage("modified array: "+Arrays.toString(newPassengersID));
 //            }
 
@@ -219,7 +218,7 @@ public class v1_21_R1 implements Compat{
 
     @Override
     public void removePlayers() {
-        Bukkit.getOnlinePlayers().forEach(player -> getPipeline((CraftPlayer) player).remove(((CraftPlayer) player).getName()));
+        Bukkit.getOnlinePlayers().forEach(player -> getPipeline((CraftPlayer) player).remove(String.format("Holo_%s", player.getName())));
     }
 
     public int getEntityID(Entity entity){

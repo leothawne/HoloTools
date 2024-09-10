@@ -35,8 +35,9 @@ public class HoloCrafterSlot {
     }
 
     public void spawn(){
+        List<Player> players = plugin.getManager().getHoloPlayerView(player);
         if(isCraftingTable){
-            HoloItemDisplay craftingTable = plugin.getCompatManager().createItemDisplay(List.of(player), player.getLocation(), getYaw(), 0);
+            HoloItemDisplay craftingTable = plugin.getCompatManager().createItemDisplay(players, player.getLocation(), getYaw(), 0);
             craftingTable.setScale(0.95f, 0.95f, 0.95f);
             craftingTable.setTranslation(0, -1 + 0.3f, 1.9f);
             craftingTable.setBrightness(new Display.Brightness(15, 15));
@@ -46,7 +47,7 @@ public class HoloCrafterSlot {
             craftingTable.mount(player);
             haloSlot.addItemDisplay("holo_crafter_crafting_table_"+haloSlot.getSlot(), craftingTable);
         }else if(recipe != null && recipe.getResult().getType() != Material.AIR){
-            HoloItemDisplay result = plugin.getCompatManager().createItemDisplay(List.of(player), player.getLocation(), getYaw(), 0);
+            HoloItemDisplay result = plugin.getCompatManager().createItemDisplay(players, player.getLocation(), getYaw(), 0);
             result.setScale(0.5f, 0.5f, 0.5f);
             result.setTranslation(0, -1 + 0.3f, 1.95f);
             result.setBrightness(new Display.Brightness(15, 15));
@@ -58,7 +59,7 @@ public class HoloCrafterSlot {
             haloSlot.addItemDisplay("holo_crafter_result_"+haloSlot.getSlot(), result);
         }
         if(textDisplay == null){
-            textDisplay = plugin.getCompatManager().createTextDisplay(List.of(player), player.getLocation(), 0, getYaw() + 180);
+            textDisplay = plugin.getCompatManager().createTextDisplay(players, player.getLocation(), 0, getYaw() + 180);
             textDisplay.setScale(0.3f, 0.3f, 0.3f);
             textDisplay.setTranslation(0, 0 + 0.3f, -1.9f);
             textDisplay.setLineWidth(200);

@@ -26,7 +26,7 @@ public class HoloHover {
             entities.put(i, display);
         }
 
-        HoloItemDisplay result = plugin.getCompatManager().createItemDisplay(List.of(player), player.getLocation(), 90 + (45 * 4), 0);
+        HoloItemDisplay result = plugin.getCompatManager().createItemDisplay(plugin.getManager().getHoloPlayerView(player), player.getLocation(), 90 + (45 * 4), 0);
         result.setTranslation(getSlotTranslation(0)[0], getSlotTranslation(0)[1], getSlotTranslation(0)[2]);
         result.setScale(-size, size, -size);
         result.setBillboard(Display.Billboard.VERTICAL);

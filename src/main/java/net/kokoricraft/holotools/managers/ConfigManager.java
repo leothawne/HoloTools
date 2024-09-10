@@ -20,6 +20,7 @@ import java.util.Map;
 public class ConfigManager {
     private final HoloTools plugin;
     public String LANG = "en";
+    public boolean HOLO_VISIBLE_FOR_EVERYONE;
     public NekoItem CRAFTER_ITEM;
     public List<HoloPanelsColors> CRAFTER_PANELS_COLORS;
     public NekoItem WARDROBE_ITEM;
@@ -37,6 +38,7 @@ public class ConfigManager {
         NekoConfig config = new NekoConfig("config.yml", plugin);
 
         LANG = config.getString("lang", "en");
+        HOLO_VISIBLE_FOR_EVERYONE = config.getBoolean("holos.visible_for_everyone", false);
         config.update();
 
         //Crafter configuration.

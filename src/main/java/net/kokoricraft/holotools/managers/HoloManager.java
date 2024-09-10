@@ -113,8 +113,6 @@ public class HoloManager {
     }
 
     public void update(Player player, long time){
-        plugin.getManager().initPacketRegister(player);
-
         if(tasks.containsKey(player)) return;
 
         BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {

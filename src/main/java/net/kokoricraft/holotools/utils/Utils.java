@@ -6,6 +6,7 @@ import net.kokoricraft.holotools.enums.DefaultFontInfo;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -202,6 +203,19 @@ public class Utils {
 
         debuggers.add(sender);
         return true;
+    }
+
+    public List<Player> getNearbyPlayers(Location location, double radius){
+        List<Player> nearbyPlayers = new ArrayList<>();
+
+        for(Player player : Bukkit.getOnlinePlayers()){
+            if(player.getWorld().equals(location.getWorld())){
+                if(player.getLocation().distance(location) <= radius)
+                    nearbyPlayers.add(player);
+            }
+        }
+
+        return nearbyPlayers;
     }
 
 }

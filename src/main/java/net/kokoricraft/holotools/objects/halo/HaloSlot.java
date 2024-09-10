@@ -47,7 +47,7 @@ public class HaloSlot {
         World world = location.getWorld();
         if(world == null) return;
 
-        background = plugin.getCompatManager().createTextDisplay(Lists.newArrayList(player), location, 0, rotation + holo.getInitialYaw() - 90);
+        background = plugin.getCompatManager().createTextDisplay(plugin.getManager().getHoloPlayerView(player), location, 0, rotation + holo.getInitialYaw() - 90);
         background.setTranslation((float) x, (float) y, (float) z);
         background.setScale(x_size, y_size, z_size);
         background.setText(" ");

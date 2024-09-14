@@ -5,6 +5,9 @@ import com.mojang.math.Transformation;
 import io.netty.channel.*;
 import net.kokoricraft.holotools.events.InventoryUpdateEvent;
 import net.kokoricraft.holotools.utils.objects.HoloColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.chat.ComponentSerializer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.*;
@@ -129,6 +132,11 @@ public class v1_20_R3 implements Compat{
     @Override
     public void removePlayers() {
         Bukkit.getOnlinePlayers().forEach(player -> getPipeline((CraftPlayer) player).remove(((CraftPlayer) player).getName()));
+    }
+
+    @Override
+    public List<BaseComponent> getToolTip(ItemStack itemStack, Player player, boolean advanced) {
+        return null;
     }
 
     public static class HoloDisplayText implements HoloTextDisplay{
@@ -276,6 +284,27 @@ public class v1_20_R3 implements Compat{
         public void setBrightness(org.bukkit.entity.Display.Brightness bukkitBrightness) {
             Brightness brightness = new Brightness(bukkitBrightness.getBlockLight(), bukkitBrightness.getSkyLight());
             textDisplay.a(brightness);
+        }
+
+        @Override
+        public void setViewRange(float range) {
+            textDisplay.b(range);
+        }
+
+        @Override
+        public void setTextOpacity(byte opacity) {
+
+        }
+
+        @Override
+        public void setText(List<BaseComponent> components) {
+            ComponentBuilder builder = new ComponentBuilder();
+            for(BaseComponent component : components){
+                builder.append(component).append("\n");
+            }
+
+            String string = ComponentSerializer.toString(builder.create()[0]);
+            textDisplay.c(CraftChatMessage.fromString(string, true)[0]);
         }
 
         @Override

@@ -8,6 +8,7 @@ import net.kokoricraft.holotools.interfaces.HoloBase;
 import net.kokoricraft.holotools.objects.colors.HoloPanelsColors;
 import net.kokoricraft.holotools.objects.halo.HaloSlot;
 import net.kokoricraft.holotools.objects.halo.Holo;
+import net.kokoricraft.holotools.objects.tooltip.TooltipDisplay;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -19,6 +20,8 @@ public class HoloWardrobe extends Holo implements HoloBase {
     private final HoloTools plugin = HoloTools.getInstance();
     private final Map<Integer, HoloWardrobeSlot> wardrobeSlots = new HashMap<>();
     private final HoloPanelsColors colors;
+    private final TooltipDisplay tooltip;
+    private int last_vertical_slot = -1;
     public HoloWardrobe(Player player, ItemStack itemStack, Map<Integer, WardrobeContent> contentMap) {
         super(8, -1.5f, itemStack);
         this.player = player;
@@ -32,6 +35,9 @@ public class HoloWardrobe extends Holo implements HoloBase {
 
             wardrobeSlots.put(key, wardrobeSlot);
         }
+
+        tooltip = new TooltipDisplay(player);
+        tooltip.setX(0.3f);
     }
 
     @Override
@@ -48,6 +54,8 @@ public class HoloWardrobe extends Holo implements HoloBase {
         if(to != null){
             to.setColor(colors.getColor(toSlot).selected());
         }
+
+        onVerticalSlot(0, getVerticalSlot());
     }
 
     @Override
@@ -75,6 +83,7 @@ public class HoloWardrobe extends Holo implements HoloBase {
                 loadArmor.apply(player);
             plugin.getDataManager().saveHoloWardrobe(itemStack, this, "swap wardrobe armor");
         }
+        onVerticalSlot(0, getVerticalSlot());
     }
 
     @Override
@@ -97,9 +106,11 @@ public class HoloWardrobe extends Holo implements HoloBase {
         if(visible){
             spawn(player);
             wardrobeSlots.values().forEach(HoloWardrobeSlot::spawnContent);
+            tooltip.spawn();
         }else {
             this.shouldRemove = true;
             remove("remove set visible false wardrobe");
+            tooltip.remove();
         }
     }
 
@@ -111,6 +122,70 @@ public class HoloWardrobe extends Holo implements HoloBase {
     @Override
     public void tick(){
         super.tick();
+
+        int vertical_slot = getVerticalSlot();
+
+        if(vertical_slot != last_vertical_slot){
+            onVerticalSlot(last_vertical_slot, vertical_slot);
+            last_vertical_slot = vertical_slot;
+        }
+    }
+
+    public void onVerticalSlot(int fromSlot, int toSlot){
+        float separation = -0.2f;
+        float y = 0.2f;
+        WardrobeContent content = getContent(getPlayerSlot());
+
+        switch (toSlot){
+            case 0 ->{
+                ItemStack stack = content == null ? null : wardrobeSlots.get(getPlayerSlot()).getContent().getHelmet();
+                tooltip.setY(y + (separation * 1));
+                tooltip.setItemStack(stack);
+            }
+            case 1 ->{
+                ItemStack stack = content == null ? null : wardrobeSlots.get(getPlayerSlot()).getContent().getChestplate();
+                tooltip.setY(y + (separation * 2));
+                tooltip.setItemStack(stack);
+            }
+            case 2 ->{
+                ItemStack stack = content == null ? null : wardrobeSlots.get(getPlayerSlot()).getContent().getLeggings();
+                tooltip.setY(y + (separation * 3));
+                tooltip.setItemStack(stack);
+            }
+            case 3 ->{
+                ItemStack stack = content == null ? null : wardrobeSlots.get(getPlayerSlot()).getContent().getBoots();
+                tooltip.setY(y + (separation * 4));
+                tooltip.setItemStack(stack);
+            }
+            default ->{
+                tooltip.setVisible(false);
+            }
+        }
+    }
+
+    private WardrobeContent getContent(int slot){
+        return wardrobeSlots.get(slot).getContent();
+    }
+
+    public int getVerticalSlot(){
+        if (player == null)
+            return -1;
+
+        float yaw = player.getLocation().getPitch();
+
+        if(yaw > -23 && yaw < -10.68)
+            return 0;
+
+        if(yaw > -10.68 && yaw < 5.19)
+            return 1;
+
+        if(yaw > 5.19 && yaw < 19)
+            return 2;
+
+        if(yaw > 19 && yaw < 32)
+            return 3;
+
+        return -1;
     }
 
     public Map<Integer, HoloWardrobeSlot> getWardrobeSlots(){

@@ -1,11 +1,22 @@
 package net.kokoricraft.holotools.version;
 
+import com.google.common.collect.Lists;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mojang.math.Transformation;
 import io.netty.channel.*;
 import net.kokoricraft.holotools.events.InventoryUpdateEvent;
 import net.kokoricraft.holotools.utils.objects.HoloColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TranslatableComponent;
+import net.md_5.bungee.chat.ComponentSerializer;
+import net.minecraft.EnumChatFormat;
 import net.minecraft.core.BlockPosition;
 import net.minecraft.network.NetworkManager;
+import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.*;
@@ -14,14 +25,20 @@ import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import net.minecraft.util.Brightness;
+import net.minecraft.util.datafix.ComponentDataFixUtils;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.player.EntityHuman;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.World;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_21_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_21_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_21_R1.entity.CraftTextDisplay;
 import org.bukkit.craftbukkit.v1_21_R1.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_21_R1.util.CraftChatMessage;
 import org.bukkit.entity.ItemDisplay;
@@ -221,6 +238,33 @@ public class v1_21_R1 implements Compat{
         Bukkit.getOnlinePlayers().forEach(player -> getPipeline((CraftPlayer) player).remove(String.format("Holo_%s", player.getName())));
     }
 
+    @Override
+    public List<BaseComponent> getToolTip(ItemStack itemStack, Player player, boolean advanced) {
+        net.minecraft.world.item.ItemStack nmsItemStack = CraftItemStack.asNMSCopy(itemStack);
+        World world = ((CraftWorld) player.getWorld()).getHandle();
+
+        EntityHuman entityPlayer =  ((CraftPlayer)player).getHandle();
+
+        List<IChatBaseComponent> list = nmsItemStack.a(Item.b.a(world), entityPlayer, advanced ? TooltipFlag.b : TooltipFlag.a);
+
+        List<BaseComponent> components = new ArrayList<>();
+
+        for(IChatBaseComponent baseComponent : list){
+            String json = CraftChatMessage.toJSON(baseComponent);
+            components.add(ComponentSerializer.deserialize(json));
+        }
+        return components;
+    }
+
+    public List<IChatBaseComponent> getToolTip2(ItemStack itemStack, Player player, boolean advanced) {
+        net.minecraft.world.item.ItemStack nmsItemStack = CraftItemStack.asNMSCopy(itemStack);
+        World world = ((CraftWorld) player.getWorld()).getHandle();
+
+        EntityHuman entityPlayer =  ((CraftPlayer)player).getHandle();
+
+        return nmsItemStack.a(Item.b.a(world), entityPlayer, advanced ? TooltipFlag.b : TooltipFlag.a);
+    }
+
     public int getEntityID(Entity entity){
         return entity.an();
     }
@@ -298,6 +342,40 @@ public class v1_21_R1 implements Compat{
         }
 
         @Override
+        public void setText(List<BaseComponent> components) {
+            List<IChatBaseComponent> iChatBaseComponents = new ArrayList<>();
+
+            for(BaseComponent baseComponent : components){
+                String json = ComponentSerializer.toJson(baseComponent).toString();
+                iChatBaseComponents.add(CraftChatMessage.fromJSONOrString(json, true));
+            }
+
+            IChatBaseComponent empty = IChatBaseComponent.i();
+
+            IChatBaseComponent mutableComponent = ChatComponentUtils.a(iChatBaseComponents, empty);
+
+            textDisplay.c(mutableComponent);
+        }
+
+        public String removeFirstExtra(String jsonString) {
+            JsonElement jsonElement = JsonParser.parseString(jsonString);
+
+            if (jsonElement.isJsonObject()) {
+                JsonObject jsonObject = jsonElement.getAsJsonObject();
+
+                if (jsonObject.has("extra") && jsonObject.get("extra").isJsonArray()) {
+                    JsonElement extraArray = jsonObject.get("extra");
+
+                    jsonObject = extraArray.getAsJsonArray().get(0).getAsJsonObject();
+
+                    return jsonObject.toString();
+                }
+            }
+
+            return jsonString;
+        }
+
+        @Override
         public void setColor(HoloColor color) {
             int colorValue = color == null ? -1 : color.asARGB();
             manager.getDataWatcher(textDisplay).a(Display.TextDisplay.aN, colorValue);
@@ -343,7 +421,7 @@ public class v1_21_R1 implements Compat{
 
         @Override
         public void setLineWidth(int width) {
-            manager.getDataWatcher(textDisplay).a(Display.TextDisplay.aN, width);
+            manager.getDataWatcher(textDisplay).a(Display.TextDisplay.aM, width);
         }
 
         @Override
@@ -395,6 +473,16 @@ public class v1_21_R1 implements Compat{
         public void setBrightness(org.bukkit.entity.Display.Brightness bukkitBrightness) {
             Brightness brightness = new Brightness(bukkitBrightness.getBlockLight(), bukkitBrightness.getSkyLight());
             textDisplay.a(brightness);
+        }
+
+        @Override
+        public void setViewRange(float range) {
+            textDisplay.b(range);
+        }
+
+        @Override
+        public void setTextOpacity(byte opacity) {
+            textDisplay.c(opacity);
         }
 
         @Override

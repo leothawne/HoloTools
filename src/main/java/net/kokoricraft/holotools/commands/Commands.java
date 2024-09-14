@@ -1,21 +1,16 @@
 package net.kokoricraft.holotools.commands;
 
 import net.kokoricraft.holotools.HoloTools;
+import net.kokoricraft.holotools.objects.tooltip.TooltipDisplay;
 import net.kokoricraft.holotools.version.HoloItemDisplay;
-import net.kokoricraft.holotools.version.HoloTextDisplay;
 import net.kokoricraft.holotools.version.v1_21_R1;
+import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Display;
-import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.List;
 
 public class Commands implements CommandExecutor {
     private final HoloTools plugin;
@@ -36,51 +31,42 @@ public class Commands implements CommandExecutor {
             case "reload" -> reloadCommand(sender);
             case "debug" -> debugCommand(sender);
             case "test" -> testCommand(sender, args);
+            case "test2" -> test2(sender, args);
         }
 
         return true;
     }
 
-    private HoloItemDisplay holo;
-
+    private TooltipDisplay tooltipDisplay = null;
     private void testCommand(CommandSender sender, String[] args) {
         Player player = (Player)sender;
-        v1_21_R1 test = (v1_21_R1) plugin.getCompatManager().getCompat();
-//        boolean enable = (args.length != 1);
-//
-//        ItemDisplay armorStand = player.getWorld().spawn(player.getLocation(), ItemDisplay.class);
-//        if(enable){
-//            if(holo != null){
-//                holo.remove();
-//            }
-//            holo = plugin.getCompatManager().createItemDisplay(List.of(player), player.getLocation(), 0, 0);
-//            holo.setScale(.3f, .3f, .3f);
-//            holo.setItemStack(new ItemStack(Material.DIAMOND_HELMET));
-//            holo.setBillboard(Display.Billboard.VERTICAL);
-//            holo.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.HEAD);
-//            holo.setTranslation(0f, 0f, 1.3f);
-//            holo.update();
-//        }else {
-//            holo.remove();
-//            holo = null;
-//        }
-//        test.test(player, args.length == 1, holo, armorStand);
+        boolean isNull = tooltipDisplay == null;
 
+        if(tooltipDisplay == null){
+            tooltipDisplay = new TooltipDisplay(player);
+            tooltipDisplay.spawn();
+        }else{
+            tooltipDisplay.setItemStack(player.getInventory().getItemInMainHand());
+        }
 
-//        sender.sendMessage("yap creative: "+ (args.length == 1));
+        if(isNull)
+            Bukkit.getScheduler().runTaskLater(plugin, () ->{
+                tooltipDisplay.remove();
+                tooltipDisplay = null;
+            }, 20 * 30);
 
-        //HoloTextDisplay holo_1 = plugin.getCompatManager().createTextDisplay(List.of(player), player.getLocation(), 0, 0);
-
-
-
-
-        test.test2(player);
-
-        Bukkit.getScheduler().runTaskLater(plugin, () ->{
-            test.test2(player);
-            sender.sendMessage("test2");
-        }, 20 * 5);
         sender.sendMessage("test");
+    }
+
+    public void test2(CommandSender sender, String[] args){
+        Player player = (Player)sender;
+
+        ItemStack itemStack = player.getInventory().getItemInMainHand();
+//        PotionMeta meta = (PotionMeta) itemStack.getItemMeta();
+
+        //Bukkit.broadcastMessage(String.format("%s, %s, %s", meta.getBasePotionData().getType(), meta.getBasePotionData().isExtended(), meta.getBasePotionData().isUpgraded()));
+
+
     }
 
     private void debugCommand(CommandSender sender) {

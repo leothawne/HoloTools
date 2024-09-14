@@ -1,10 +1,13 @@
 package net.kokoricraft.holotools.version;
 
 import net.kokoricraft.holotools.utils.objects.HoloColor;
+import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Location;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
+
+import java.util.List;
 
 public interface HoloTextDisplay {
     void update(Location location);
@@ -26,4 +29,7 @@ public interface HoloTextDisplay {
     void mount(Player player);
     Location getLocation();
     void setBrightness(Display.Brightness brightness);
+    void setViewRange(float range);
+    void setTextOpacity(byte opacity);
+    void setText(List<BaseComponent> components);
 }

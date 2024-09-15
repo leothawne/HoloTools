@@ -2,17 +2,17 @@ package net.kokoricraft.holotools.objects.tooltip;
 
 import com.google.common.base.Strings;
 import net.kokoricraft.holotools.HoloTools;
-import net.kokoricraft.holotools.enums.DefaultFontInfo;
 import net.kokoricraft.holotools.utils.objects.HoloColor;
 import net.kokoricraft.holotools.version.HoloTextDisplay;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.TextDisplay;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.entity.TextDisplay.TextAlignment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 public class TooltipDisplay {
-    private final static float size = 0.15f;
+    private final static float size = 0.2f;
     private final static HoloColor background_color = HoloColor.fromARGB(255, 16, 0, 16);
     private final static HoloColor outline_color = HoloColor.fromHex("#270066", 255);
     private final static HoloColor white = HoloColor.fromARGB(255, 255, 255, 255);
@@ -81,54 +81,59 @@ public class TooltipDisplay {
         background1.setScale(1 * size, (1 + (.38f / rows))* size, 1 * size);
         background1.setText(getTooltip(2));
         background1.setColor(background_color);
-        background1.setAlignment(TextDisplay.TextAlignment.LEFT);
+        background1.setAlignment(TextAlignment.LEFT);
         background1.setTextOpacity((byte) 10);
         background1.setLineWidth(999999999);
         background1.setBillboard(billboard);
         background1.setTranslation(x + (x_translation * size), (-0.048f * size) + (y_translation * size) + y, 0.00f + z_player);
+        background1.setBrightness(new Display.Brightness(15, 15));
         entities.put(TooltipLayerType.BACKGROUND1, background1);
 
         HoloTextDisplay background2 = plugin.getCompatManager().createTextDisplay(viewers, location, 0, 0);
         background2.setScale(1 * size, (1 + (.18f / rows)) * size, 1 * size);
         background2.setText(getTooltip(3));
         background2.setColor(background_color);
-        background2.setAlignment(TextDisplay.TextAlignment.LEFT);
+        background2.setAlignment(TextAlignment.LEFT);
         background2.setTextOpacity((byte) 10);
         background2.setLineWidth(999999999);
         background2.setBillboard(billboard);
         background2.setTranslation(x + (x_translation * size), (-0.024f * size) + (y_translation * size) + y, 0.003f + z_player);
+        background2.setBrightness(new Display.Brightness(15, 15));
         entities.put(TooltipLayerType.BACKGROUND2, background2);
 
         HoloTextDisplay outline1 = plugin.getCompatManager().createTextDisplay(viewers, location, 0, 0);
         outline1.setScale(1 * size, (1 + (.18f / rows)) * size, 1 * size);
         outline1.setText(getTooltip(2));
         outline1.setColor(outline_color);
-        outline1.setAlignment(TextDisplay.TextAlignment.LEFT);
+        outline1.setAlignment(TextAlignment.LEFT);
         outline1.setTextOpacity((byte) 10);
         outline1.setLineWidth(999999999);
         outline1.setBillboard(billboard);
         outline1.setTranslation(x + (x_translation * size), (-0.024f * size) + (y_translation * size) + y, 0.006f + z_player);
+        outline1.setBrightness(new Display.Brightness(15, 15));
         entities.put(TooltipLayerType.OUTLINE1, outline1);
 
         HoloTextDisplay outline2 = plugin.getCompatManager().createTextDisplay(viewers, location, 0, 0);
         outline2.setScale(1 * size, 1 * size, 1 * size);
         outline2.setText(getTooltip(1));
         outline2.setColor(background_color);
-        outline2.setAlignment(TextDisplay.TextAlignment.LEFT);
+        outline2.setAlignment(TextAlignment.LEFT);
         outline2.setTextOpacity((byte) 10);
         outline2.setLineWidth(999999999);
         outline2.setBillboard(billboard);
         outline2.setTranslation(x + (x_translation * size), (y_translation * size) + y, 0.009f+ z_player);
+        outline2.setBrightness(new Display.Brightness(15, 15));
         entities.put(TooltipLayerType.OUTLINE2, outline2);
 
         HoloTextDisplay text = plugin.getCompatManager().createTextDisplay(viewers, location, 0, 0);
         text.setScale(1 * size, 1 * size, 1 * size);
         text.setText(getTooltip(0));
         text.setColor(background_color);
-        text.setAlignment(TextDisplay.TextAlignment.LEFT);
+        text.setAlignment(TextAlignment.LEFT);
         text.setLineWidth(999999999);
         text.setBillboard(billboard);
         text.setTranslation(x + (x_translation * size), (y_translation * size) + y, 0.012f + z_player);
+        text.setBrightness(new Display.Brightness(15, 15));
         entities.put(TooltipLayerType.TEXT, text);
 
         background1.update();
@@ -223,6 +228,15 @@ public class TooltipDisplay {
     }
 
     public void setVisible(boolean visible){
+        if(plugin.getCompatManager().VERSION.contains("1_19")){
+            if(visible){
+                update();
+            }else {
+                remove();
+            }
+            return;
+        }
+
         entities.values().forEach(text -> {
             text.setViewRange(visible ? 60 : 0);
             text.update();

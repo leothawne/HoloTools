@@ -1,24 +1,26 @@
 package net.kokoricraft.holotools.version;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.math.Transformation;
 import io.netty.channel.*;
 import net.kokoricraft.holotools.events.InventoryUpdateEvent;
 import net.kokoricraft.holotools.utils.objects.HoloColor;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.chat.ComponentSerializer;
 import net.minecraft.network.NetworkManager;
+import net.minecraft.network.chat.ChatComponentUtils;
+import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.*;
-import net.minecraft.server.level.EntityPlayer;
+import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import net.minecraft.util.Brightness;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.TooltipFlag;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
@@ -36,7 +38,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 public class v1_20_R3 implements Compat{
-    public final Map<Integer, Map<Integer, Entity>> passengers = new HashMap<>();
+    public final Map<Integer, List<Entity>> passengers = new HashMap<>();
 
     @Override
     public HoloTextDisplay createTextDisplay(List<Player> players, Location location, float yaw, float pitch) {
@@ -47,17 +49,12 @@ public class v1_20_R3 implements Compat{
     public HoloItemDisplay createItemDisplay(List<Player> players, Location location, float yaw, float pitch) {
         return new HoloDisplayItem(players, location, yaw, pitch, this);
     }
-    public void remove(int targetID, int entity){
-        Map<Integer, Entity> entities = passengers.getOrDefault(targetID, new HashMap<>());
-        entities.remove(entity);
-        passengers.put(targetID, entities);
-    }
 
     @Override
     public void initPacketsRegister(Player player){
         try{
             ChannelPipeline pipeline = getPipeline((CraftPlayer) player);
-            pipeline.addBefore("packet_handler", player.getName(), new ChannelDuplexHandler(){
+            pipeline.addBefore("packet_handler", String.format("Holo_%s", player.getName()), new ChannelDuplexHandler(){
                 @Override
                 public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
                     if(msg instanceof Packet<?> packet){
@@ -67,35 +64,7 @@ public class v1_20_R3 implements Compat{
                         }
 
                         if(name.endsWith("ClientboundSetPassengersPacket") || name.endsWith("PacketPlayOutMount")){
-                            boolean isPaper = name.endsWith("ClientboundSetPassengersPacket");
-                            String vehicleFieldName = isPaper ? "vehicle" : "a";
-                            String passengersFieldName = isPaper ? "passengers" : "b";
-
-                            try {
-                                Field targetField = msg.getClass().getDeclaredField(vehicleFieldName);
-                                targetField.setAccessible(true);
-                                int targetID = targetField.getInt(msg);
-
-                                Field passengersField = msg.getClass().getDeclaredField(passengersFieldName);
-                                passengersField.setAccessible(true);
-                                int[] passengersID = (int[]) passengersField.get(msg);
-
-                                Map<Integer, Entity> entities = passengers.getOrDefault(targetID, new HashMap<>());
-
-                                int[] newPassengersID = new int[passengersID.length + entities.size()];
-
-                                System.arraycopy(passengersID, 0, newPassengersID, 0, passengersID.length);
-
-                                int index = passengersID.length;
-                                for (Integer entityID : entities.keySet()) {
-                                    newPassengersID[index++] = entityID;
-                                }
-
-                                passengersField.set(msg, newPassengersID);
-
-                            } catch (Exception exception) {
-                                exception.printStackTrace();
-                            }
+                           onMountPacketSend(msg, player);
                         }
                     }
                     super.write(ctx, msg, promise);
@@ -104,6 +73,45 @@ public class v1_20_R3 implements Compat{
         }catch (Exception exception){
             exception.printStackTrace();
         }
+    }
+
+    public void onMountPacketSend(Object msg, Player player){
+        boolean isPaper = msg.getClass().getName().endsWith("ClientboundSetPassengersPacket");
+        String vehicleFieldName = isPaper ? "vehicle" : "a";
+        String passengersFieldName = isPaper ? "passengers" : "b";
+
+        try {
+            Field targetField = msg.getClass().getDeclaredField(vehicleFieldName);
+            targetField.setAccessible(true);
+            int targetID = targetField.getInt(msg);
+
+            if(!passengers.containsKey(targetID)) return;
+
+            Field passengersField = msg.getClass().getDeclaredField(passengersFieldName);
+            passengersField.setAccessible(true);
+            int[] passengersID = (int[]) passengersField.get(msg);
+
+            List<Entity> entities = new ArrayList<>(passengers.get(targetID));
+
+            int[] newPassengersID = new int[passengersID.length + entities.size()];
+
+            System.arraycopy(passengersID, 0, newPassengersID, 0, passengersID.length);
+
+            int index = passengersID.length;
+            for (Entity entity : entities) {
+                int entityID = getEntityID(entity);
+                newPassengersID[index++] = entityID;
+            }
+
+            passengersField.set(msg, newPassengersID);
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+    }
+
+    public int getEntityID(Entity entity){
+        return entity.aj();
     }
 
     private ChannelPipeline getPipeline(CraftPlayer player){
@@ -131,12 +139,52 @@ public class v1_20_R3 implements Compat{
 
     @Override
     public void removePlayers() {
-        Bukkit.getOnlinePlayers().forEach(player -> getPipeline((CraftPlayer) player).remove(((CraftPlayer) player).getName()));
+        Bukkit.getOnlinePlayers().forEach(player -> getPipeline((CraftPlayer) player).remove(String.format("Holo_%s", player.getName())));
+    }
+
+    public void sendPacket(List<Player> players, Packet<?> packet){
+        players.forEach(player -> {
+            ((CraftPlayer)player).getHandle().c.b(packet);
+        });
+    }
+
+    public void removePassengers(Player target, Entity passenger){
+        if(target == null) return;
+        List<Entity> entities = new ArrayList<>(passengers.getOrDefault(target.getEntityId(), new ArrayList<>()));
+        entities.remove(passenger);
+        passengers.put(target.getEntityId(), entities);
+    }
+
+    public DataWatcher getDataWatcher(Entity entity){
+        return entity.an();
     }
 
     @Override
     public List<BaseComponent> getToolTip(ItemStack itemStack, Player player, boolean advanced) {
-        return null;
+        net.minecraft.world.item.ItemStack nmsItemStack = CraftItemStack.asNMSCopy(itemStack);
+
+        EntityHuman entityPlayer =  ((CraftPlayer)player).getHandle();
+
+        List<IChatBaseComponent> list = nmsItemStack.a(entityPlayer, advanced ? TooltipFlag.b : TooltipFlag.a);
+
+        List<BaseComponent> components = new ArrayList<>();
+
+        for(IChatBaseComponent baseComponent : list){
+            String json = CraftChatMessage.toJSON(baseComponent);
+            components.add(ComponentSerializer.deserialize(json));
+        }
+        return components;
+    }
+
+    public void mount(List<Player> players, Player target, Entity passenger){
+        List<Entity> entities = passengers.getOrDefault(target.getEntityId(), new ArrayList<>());
+        if(!entities.contains(passenger))
+            entities.add(passenger);
+
+        passengers.put(target.getEntityId(), entities);
+
+        PacketPlayOutMount packet = new PacketPlayOutMount(((CraftPlayer)target).getHandle());
+        sendPacket(players, packet);
     }
 
     public static class HoloDisplayText implements HoloTextDisplay{
@@ -153,10 +201,9 @@ public class v1_20_R3 implements Compat{
             this.location = location;
             WorldServer world = ((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle();
             this.textDisplay = new Display.TextDisplay(EntityTypes.aY, world);
-            spawnPacket =  new PacketPlayOutSpawnEntity(textDisplay.aj(), textDisplay.cw(), location.getX(), location.getY(), location.getZ(), yaw, pitch, textDisplay.ai(), 0, textDisplay.dp(), textDisplay.cp());
-            players.forEach(player -> {
-                ((CraftPlayer)player).getHandle().c.b(spawnPacket);
-            });
+            spawnPacket =  new PacketPlayOutSpawnEntity(((v1_20_R3) manager).getEntityID(textDisplay), textDisplay.cw(), location.getX(), location.getY(), location.getZ(), yaw, pitch, textDisplay.ai(), 0, textDisplay.dp(), textDisplay.cp());
+
+            ((v1_20_R3) manager).sendPacket(players, spawnPacket);
         }
 
         @Override
@@ -164,9 +211,8 @@ public class v1_20_R3 implements Compat{
             if(players.isEmpty()) return;
             this.location = location;
             PacketPlayOutEntityTeleport teleport = new PacketPlayOutEntityTeleport(textDisplay);
-            players.forEach(player -> {
-                ((CraftPlayer)player).getHandle().c.b(teleport);
-            });
+
+            manager.sendPacket(players, teleport);
 
             internalUpdate();
         }
@@ -174,11 +220,11 @@ public class v1_20_R3 implements Compat{
         @Override
         public void remove() {
             if(players.isEmpty()) return;
-            PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(textDisplay.aj()); //textDisplay.al() = getId()
-            players.forEach(player -> {
-                ((CraftPlayer)player).getHandle().c.b(destroy);
-            });
-            manager.remove(target.getEntityId(), textDisplay.aj());
+            PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(manager.getEntityID(textDisplay)); //textDisplay.al() = getId()
+            manager.sendPacket(players, destroy);
+
+            manager.sendPacket(players, destroy);
+            manager.removePassengers(target, textDisplay);
         }
 
         @Override
@@ -189,7 +235,7 @@ public class v1_20_R3 implements Compat{
         @Override
         public void setColor(HoloColor color) {
             int colorValue = color == null ? -1 : color.asARGB();
-            textDisplay.an().b(Display.TextDisplay.aO, colorValue); //CraftTextDisplay.setBackgroundColor
+            manager.getDataWatcher(textDisplay).b(Display.TextDisplay.aO, colorValue); //CraftTextDisplay.setBackgroundColor
         }
 
         @Override
@@ -199,14 +245,14 @@ public class v1_20_R3 implements Compat{
 
         @Override
         public void setScale(float x, float y, float z) {
-            Transformation nms = Display.a(textDisplay.an()); // ar = getDataWatcher
+            Transformation nms = Display.a(manager.getDataWatcher(textDisplay)); // ar = getDataWatcher
             Transformation transformation = new Transformation(nms.d(), nms.e(), new Vector3f(x, y, z), nms.g());
             textDisplay.a(transformation);
         }
 
         @Override
         public void setRotation(float x, float y, float z) {
-            Transformation nms = Display.a(textDisplay.an());
+            Transformation nms = Display.a(manager.getDataWatcher(textDisplay));
             Quaternionf quaternionf = new Quaternionf();
             quaternionf.rotateXYZ((float) Math.toRadians(x), (float) Math.toRadians(y), (float) Math.toRadians(z));
             Transformation transformation = new Transformation(nms.d(), quaternionf, nms.f(), nms.g());
@@ -232,7 +278,7 @@ public class v1_20_R3 implements Compat{
 
         @Override
         public void setLineWidth(int width) {
-            textDisplay.an().b(Display.TextDisplay.aO, width);
+            manager.getDataWatcher(textDisplay).b(Display.TextDisplay.aN, width);
         }
 
         @Override
@@ -264,7 +310,7 @@ public class v1_20_R3 implements Compat{
 
         @Override
         public void setTranslation(float x, float y, float z) {
-            Transformation nms = Display.a(textDisplay.an());
+            Transformation nms = Display.a(manager.getDataWatcher(textDisplay));
             Transformation transformation = new Transformation(new Vector3f(x, y, z), nms.e(), nms.f(), nms.g());
             textDisplay.a(transformation);
         }
@@ -293,41 +339,29 @@ public class v1_20_R3 implements Compat{
 
         @Override
         public void setTextOpacity(byte opacity) {
-
+            textDisplay.c(opacity);
         }
 
         @Override
         public void setText(List<BaseComponent> components) {
-            ComponentBuilder builder = new ComponentBuilder();
-            for(BaseComponent component : components){
-                builder.append(component).append("\n");
+            List<IChatBaseComponent> iChatBaseComponents = new ArrayList<>();
+
+            for(BaseComponent baseComponent : components){
+                String json = ComponentSerializer.toJson(baseComponent).toString();
+                iChatBaseComponents.add(CraftChatMessage.fromJSONOrString(json, true));
             }
 
-            String string = ComponentSerializer.toString(builder.create()[0]);
-            textDisplay.c(CraftChatMessage.fromString(string, true)[0]);
+            IChatBaseComponent empty = IChatBaseComponent.i();
+
+            IChatBaseComponent mutableComponent = ChatComponentUtils.a(iChatBaseComponents, empty);
+
+            textDisplay.c(mutableComponent);
         }
 
         @Override
         public void mount(Player target) {
             this.target =  target;
-            Entity entityPlayer = ((CraftPlayer)target).getHandle();
-            List<Entity> list = new ArrayList<>(entityPlayer.r);
-            List<Entity> backup = new ArrayList<>(list);
-            Map<Integer, Entity> entities = manager.passengers.getOrDefault(target.getEntityId(), new HashMap<>());
-            entities.put(textDisplay.aj(), textDisplay);
-            manager.passengers.put(target.getEntityId(), entities);
-
-            if(!list.contains(textDisplay))
-                list.add(textDisplay);
-
-            entityPlayer.r = ImmutableList.copyOf(list);
-            PacketPlayOutMount packet = new PacketPlayOutMount(entityPlayer);
-
-            players.forEach(player -> {
-                ((CraftPlayer)player).getHandle().c.b(packet);
-            });
-
-            entityPlayer.r = ImmutableList.copyOf(backup);
+           manager.mount(players, target, textDisplay);
         }
 
         @Override
@@ -336,10 +370,8 @@ public class v1_20_R3 implements Compat{
         }
 
         public void internalUpdate(){
-            PacketPlayOutEntityMetadata metadata = new PacketPlayOutEntityMetadata(textDisplay.aj(), textDisplay.an().c());
-            players.forEach(player -> {
-                ((CraftPlayer)player).getHandle().c.b(metadata);
-            });
+            PacketPlayOutEntityMetadata metadata = new PacketPlayOutEntityMetadata(manager.getEntityID(textDisplay), manager.getDataWatcher(textDisplay).c());
+            manager.sendPacket(players, metadata);
         }
 
         public void setFlag(int flag, boolean set){
@@ -367,11 +399,9 @@ public class v1_20_R3 implements Compat{
             this.location = location;
             WorldServer world = ((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle();
             this.itemDisplay = new Display.ItemDisplay(EntityTypes.af, world);
-            spawnPacket = new PacketPlayOutSpawnEntity(itemDisplay.aj(), itemDisplay.cw(), location.getX(), location.getY(), location.getZ(), pitch, yaw, itemDisplay.ai(), 0, itemDisplay.dp(), itemDisplay.cp());
+            spawnPacket = new PacketPlayOutSpawnEntity(((v1_20_R3) manager).getEntityID(itemDisplay), itemDisplay.cw(), location.getX(), location.getY(), location.getZ(), pitch, yaw, itemDisplay.ai(), 0, itemDisplay.dp(), itemDisplay.cp());
 
-            players.forEach(player -> {
-                ((CraftPlayer)player).getHandle().c.b(spawnPacket);
-            });
+            ((v1_20_R3) manager).sendPacket(players, spawnPacket);
         }
 
         @Override
@@ -379,9 +409,7 @@ public class v1_20_R3 implements Compat{
             if(players.isEmpty()) return;
             this.location = location;
             PacketPlayOutEntityTeleport teleport = new PacketPlayOutEntityTeleport(itemDisplay);
-            players.forEach(player -> {
-                ((CraftPlayer)player).getHandle().c.b(teleport);
-            });
+            manager.sendPacket(players, teleport);
 
             internalUpdate();
         }
@@ -389,11 +417,9 @@ public class v1_20_R3 implements Compat{
         @Override
         public void remove() {
             if(players.isEmpty()) return;
-            PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(itemDisplay.aj());
-            players.forEach(player -> {
-                ((CraftPlayer)player).getHandle().c.b(destroy);
-            });
-            manager.remove(target.getEntityId(), itemDisplay.aj());
+            PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(manager.getEntityID(itemDisplay));
+            manager.sendPacket(players, destroy);
+            manager.removePassengers(target, itemDisplay);
         }
 
         @Override
@@ -403,14 +429,14 @@ public class v1_20_R3 implements Compat{
 
         @Override
         public void setScale(float x, float y, float z) {
-            Transformation nms = Display.a(itemDisplay.an());
+            Transformation nms = Display.a(manager.getDataWatcher(itemDisplay));
             Transformation transformation = new Transformation(nms.d(), nms.e(), new Vector3f(x, y, z), nms.g());
             itemDisplay.a(transformation);
         }
 
         @Override
         public void setRotation(float x, float y, float z) {
-            Transformation nms = Display.a(itemDisplay.an());
+            Transformation nms = Display.a(manager.getDataWatcher(itemDisplay));
             Quaternionf quaternionf = new Quaternionf();
             quaternionf.rotateXYZ((float) Math.toRadians(x), (float) Math.toRadians(y), (float) Math.toRadians(z));
             Transformation transformation = new Transformation(nms.d(), quaternionf, nms.f(), nms.g());
@@ -419,7 +445,7 @@ public class v1_20_R3 implements Compat{
 
         @Override
         public void setTranslation(float x, float y, float z) {
-            Transformation nms = Display.a(itemDisplay.an());
+            Transformation nms = Display.a(manager.getDataWatcher(itemDisplay));
             Transformation transformation = new Transformation(new Vector3f(x, y, z), nms.e(), nms.f(), nms.g());
             itemDisplay.a(transformation);
         }
@@ -444,32 +470,15 @@ public class v1_20_R3 implements Compat{
         @Override
         public void mount(Player target) {
             this.target =  target;
-            Entity entityPlayer = ((CraftPlayer)target).getHandle();
-            List<Entity> list = new ArrayList<>(entityPlayer.r);
-            List<Entity> backup = new ArrayList<>(list);
-            Map<Integer, Entity> entities = manager.passengers.getOrDefault(target.getEntityId(), new HashMap<>());
-            entities.put(itemDisplay.aj(), itemDisplay);
-            manager.passengers.put(target.getEntityId(), entities);
-
-            if(!list.contains(itemDisplay))
-                list.add(itemDisplay);
-
-            entityPlayer.r = ImmutableList.copyOf(list);
-            PacketPlayOutMount packet = new PacketPlayOutMount(entityPlayer);
-
-            players.forEach(player -> {
-                ((CraftPlayer)player).getHandle().c.b(packet);
-            });
-
-            entityPlayer.r = ImmutableList.copyOf(backup);
+           manager.mount(players, target, itemDisplay);
         }
 
         @Override
         public void setItemStack(ItemStack itemStack) {
             net.minecraft.world.item.ItemStack nmsgItemStack = CraftItemStack.asNMSCopy(itemStack);
             itemDisplay.a(nmsgItemStack);
-            PacketPlayOutEntityMetadata metadata = new PacketPlayOutEntityMetadata(itemDisplay.aj(), itemDisplay.an().c());
-            players.forEach(player -> ((CraftPlayer)player).getHandle().c.b(metadata));
+            PacketPlayOutEntityMetadata metadata = new PacketPlayOutEntityMetadata(manager.getEntityID(itemDisplay), manager.getDataWatcher(itemDisplay).c());
+            manager.sendPacket(players, metadata);
         }
 
         @Override
@@ -499,10 +508,8 @@ public class v1_20_R3 implements Compat{
         }
 
         public void internalUpdate(){
-            PacketPlayOutEntityMetadata metadata = new PacketPlayOutEntityMetadata(itemDisplay.aj(), itemDisplay.an().c());
-            players.forEach(player -> {
-                ((CraftPlayer)player).getHandle().c.b(metadata);
-            });
+            PacketPlayOutEntityMetadata metadata = new PacketPlayOutEntityMetadata(manager.getEntityID(itemDisplay), manager.getDataWatcher(itemDisplay).c());
+            manager.sendPacket(players, metadata);
         }
     }
 }

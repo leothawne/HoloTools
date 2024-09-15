@@ -256,15 +256,6 @@ public class v1_21_R1 implements Compat{
         return components;
     }
 
-    public List<IChatBaseComponent> getToolTip2(ItemStack itemStack, Player player, boolean advanced) {
-        net.minecraft.world.item.ItemStack nmsItemStack = CraftItemStack.asNMSCopy(itemStack);
-        World world = ((CraftWorld) player.getWorld()).getHandle();
-
-        EntityHuman entityPlayer =  ((CraftPlayer)player).getHandle();
-
-        return nmsItemStack.a(Item.b.a(world), entityPlayer, advanced ? TooltipFlag.b : TooltipFlag.a);
-    }
-
     public int getEntityID(Entity entity){
         return entity.an();
     }

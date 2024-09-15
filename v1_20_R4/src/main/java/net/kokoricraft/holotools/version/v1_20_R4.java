@@ -9,6 +9,8 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.chat.ComponentSerializer;
 import net.minecraft.network.NetworkManager;
+import net.minecraft.network.chat.ChatComponentUtils;
+import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.network.syncher.DataWatcher;
@@ -18,7 +20,11 @@ import net.minecraft.util.Brightness;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.player.EntityHuman;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.World;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_20_R4.CraftWorld;
@@ -36,7 +42,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 public class v1_20_R4 implements Compat{
-    private final Map<Integer, Map<Integer, Entity>> passengers = new HashMap<>();
+    private final Map<Integer, List<Entity>> passengers = new HashMap<>();
 
     @Override
     public HoloTextDisplay createTextDisplay(List<Player> players, Location location, float yaw, float pitch) {
@@ -53,7 +59,7 @@ public class v1_20_R4 implements Compat{
         try{
             ChannelPipeline pipeline = getPipeline((CraftPlayer) player);
 
-            pipeline.addBefore("packet_handler", player.getName(), new ChannelDuplexHandler(){
+            pipeline.addBefore("packet_handler", String.format("Holo_%s", player.getName()), new ChannelDuplexHandler(){
                 @Override
                 public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
                     if(msg instanceof Packet<?> packet){
@@ -100,26 +106,29 @@ public class v1_20_R4 implements Compat{
 
     private void onMountPacketSend(Object msg){
         boolean isPaper = msg.getClass().getName().endsWith("ClientboundSetPassengersPacket");
-        String vehicleFieldName = isPaper ? "vehicle" : "a";
-        String passengersFieldName = isPaper ? "passengers" : "b";
+        String vehicleFieldName = isPaper ? "vehicle" : "b";
+        String passengersFieldName = isPaper ? "passengers" : "c";
 
         try {
             Field targetField = msg.getClass().getDeclaredField(vehicleFieldName);
             targetField.setAccessible(true);
             int targetID = targetField.getInt(msg);
 
+            if(!passengers.containsKey(targetID)) return;
+
             Field passengersField = msg.getClass().getDeclaredField(passengersFieldName);
             passengersField.setAccessible(true);
             int[] passengersID = (int[]) passengersField.get(msg);
 
-            Map<Integer, Entity> entities = passengers.getOrDefault(targetID, new HashMap<>());
+            List<Entity> entities = new ArrayList<>(passengers.get(targetID));
 
             int[] newPassengersID = new int[passengersID.length + entities.size()];
 
             System.arraycopy(passengersID, 0, newPassengersID, 0, passengersID.length);
 
             int index = passengersID.length;
-            for (Integer entityID : entities.keySet()) {
+            for (Entity entity : entities) {
+                int entityID = getEntityID(entity);
                 newPassengersID[index++] = entityID;
             }
 
@@ -132,12 +141,24 @@ public class v1_20_R4 implements Compat{
 
     @Override
     public void removePlayers() {
-        Bukkit.getOnlinePlayers().forEach(player -> getPipeline((CraftPlayer) player).remove(((CraftPlayer) player).getName()));
+        Bukkit.getOnlinePlayers().forEach(player -> getPipeline((CraftPlayer) player).remove(String.format("Holo_%s", player.getName())));
     }
 
     @Override
     public List<BaseComponent> getToolTip(ItemStack itemStack, Player player, boolean advanced) {
-        return null;
+        net.minecraft.world.item.ItemStack nmsItemStack = CraftItemStack.asNMSCopy(itemStack);
+        World world = ((CraftWorld) player.getWorld()).getHandle();
+        EntityHuman entityPlayer =  ((CraftPlayer)player).getHandle();
+
+        List<IChatBaseComponent> list = nmsItemStack.a(Item.b.a(world), entityPlayer, advanced ? TooltipFlag.b : TooltipFlag.a);
+
+        List<BaseComponent> components = new ArrayList<>();
+
+        for(IChatBaseComponent baseComponent : list){
+            String json = CraftChatMessage.toJSON(baseComponent);
+            components.add(ComponentSerializer.deserialize(json));
+        }
+        return components;
     }
 
     public int getEntityID(Entity entity){
@@ -156,27 +177,20 @@ public class v1_20_R4 implements Compat{
 
     public void removePassengers(Player target, Entity passenger){
         if(target == null) return;
-        Map<Integer, Entity> entities = passengers.getOrDefault(target.getEntityId(), new HashMap<>());
-        entities.remove(getEntityID(passenger));
+        List<Entity> entities = new ArrayList<>(passengers.getOrDefault(target.getEntityId(), new ArrayList<>()));
+        entities.remove(passenger);
         passengers.put(target.getEntityId(), entities);
     }
 
-    public void mount(List<Player> players, Player target, Entity vehicle){
-        Entity entityPlayer = ((CraftPlayer)target).getHandle();
-        List<Entity> list = new ArrayList<>(entityPlayer.p);
-        List<Entity> backup = new ArrayList<>(list);
-        Map<Integer, Entity> entities = passengers.getOrDefault(target.getEntityId(), new HashMap<>());
-        entities.put(getEntityID(vehicle), vehicle);
-        passengers.put(target.getEntityId(), entities);
+    public void mount(List<Player> players, Player target, Entity passenger){
+       List<Entity> entities = passengers.getOrDefault(target.getEntityId(), new ArrayList<>());
+       if(!entities.contains(passenger))
+           entities.add(passenger);
 
-        list.add(entityPlayer);
+       passengers.put(target.getEntityId(), entities);
 
-        entityPlayer.p = ImmutableList.copyOf(list);
-        PacketPlayOutMount packet = new PacketPlayOutMount(entityPlayer);
-
-        sendPacket(players, packet);
-
-        entityPlayer.p = ImmutableList.copyOf(backup);
+       PacketPlayOutMount packet = new PacketPlayOutMount(((CraftPlayer)target).getHandle());
+       sendPacket(players, packet);
     }
 
     public static class HoloDisplayText implements HoloTextDisplay{
@@ -328,18 +342,23 @@ public class v1_20_R4 implements Compat{
 
         @Override
         public void setTextOpacity(byte opacity) {
-
+            textDisplay.c(opacity);
         }
 
         @Override
         public void setText(List<BaseComponent> components) {
-            ComponentBuilder builder = new ComponentBuilder();
-            for(BaseComponent component : components){
-                builder.append(component).append("\n");
+            List<IChatBaseComponent> iChatBaseComponents = new ArrayList<>();
+
+            for(BaseComponent baseComponent : components){
+                String json = ComponentSerializer.toJson(baseComponent).toString();
+                iChatBaseComponents.add(CraftChatMessage.fromJSONOrString(json, true));
             }
 
-            String string = ComponentSerializer.toString(builder.create()[0]);
-            textDisplay.c(CraftChatMessage.fromString(string, true)[0]);
+            IChatBaseComponent empty = IChatBaseComponent.i();
+
+            IChatBaseComponent mutableComponent = ChatComponentUtils.a(iChatBaseComponents, empty);
+
+            textDisplay.c(mutableComponent);
         }
 
         @Override

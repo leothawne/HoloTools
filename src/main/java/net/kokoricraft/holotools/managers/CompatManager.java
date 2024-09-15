@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 public class CompatManager {
-    public String version = "";
+    public String VERSION = "";
     private final HoloTools plugin;
     private final Compat compat;
     private final Map<String, String> versions = new HashMap<>(){
@@ -33,23 +33,23 @@ public class CompatManager {
     private void setVersionCompat() {
         String packageName = Bukkit.getServer().getClass().getPackage().getName();
         if(packageName.contains("v")){
-            version = packageName.substring(packageName.lastIndexOf('.') + 1);
+            VERSION = packageName.substring(packageName.lastIndexOf('.') + 1);
         }else {
             String bukkitVersion = Bukkit.getBukkitVersion().split("-")[0];
-            this.version = versions.getOrDefault(bukkitVersion, "-[NYA]-");
+            this.VERSION = versions.getOrDefault(bukkitVersion, "-[NYA]-");
         }
     }
 
     private Compat loadCompat() {
-        Compat compat = tryCompat(version);
+        Compat compat = tryCompat(VERSION);
 
         if(compat == null){
-            plugin.getLogger().severe(String.format("Version no support. report to author. version not supported: [%s]", version));
+            plugin.getLogger().severe(String.format("Version no support. report to author. version not supported: [%s]", VERSION));
             Bukkit.getPluginManager().disablePlugin(plugin);
             return null;
         }
 
-        plugin.getLogger().info(String.format("HoloTools loaded!. Selected version: [%s]", version));
+        plugin.getLogger().info(String.format("HoloTools loaded!. Selected version: [%s]", VERSION));
         return compat;
     }
 

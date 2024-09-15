@@ -139,23 +139,39 @@ public class HoloWardrobe extends Holo implements HoloBase {
         switch (toSlot){
             case 0 ->{
                 ItemStack stack = content == null ? null : wardrobeSlots.get(getPlayerSlot()).getContent().getHelmet();
-                tooltip.setY(y + (separation * 1));
-                tooltip.setItemStack(stack);
+                if(stack != null){
+                    tooltip.setY(y + (separation * 1));
+                    tooltip.setItemStack(stack);
+                }else{
+                    tooltip.setVisible(false);
+                }
             }
             case 1 ->{
                 ItemStack stack = content == null ? null : wardrobeSlots.get(getPlayerSlot()).getContent().getChestplate();
-                tooltip.setY(y + (separation * 2));
-                tooltip.setItemStack(stack);
+                if(stack != null){
+                    tooltip.setY(y + (separation * 2));
+                    tooltip.setItemStack(stack);
+                }else{
+                    tooltip.setVisible(false);
+                }
             }
             case 2 ->{
                 ItemStack stack = content == null ? null : wardrobeSlots.get(getPlayerSlot()).getContent().getLeggings();
-                tooltip.setY(y + (separation * 3));
-                tooltip.setItemStack(stack);
+                if(stack != null){
+                    tooltip.setY(y + (separation * 3));
+                    tooltip.setItemStack(stack);
+                }else{
+                    tooltip.setVisible(false);
+                }
             }
             case 3 ->{
                 ItemStack stack = content == null ? null : wardrobeSlots.get(getPlayerSlot()).getContent().getBoots();
-                tooltip.setY(y + (separation * 4));
-                tooltip.setItemStack(stack);
+                if(stack != null){
+                    tooltip.setY(y + (separation * 4));
+                    tooltip.setItemStack(stack);
+                }else{
+                    tooltip.setVisible(false);
+                }
             }
             default ->{
                 tooltip.setVisible(false);

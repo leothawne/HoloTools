@@ -8,19 +8,16 @@ import net.kokoricraft.holotools.listeners.HoloListener;
 import net.kokoricraft.holotools.listeners.PlayerListener;
 import net.kokoricraft.holotools.managers.*;
 import net.kokoricraft.holotools.objects.halo.Holo;
-import net.kokoricraft.holotools.objects.holocrafter.HoloCrafter;
 import net.kokoricraft.holotools.utils.CraftItemsUtils;
 import net.kokoricraft.holotools.utils.Metrics;
+import net.kokoricraft.holotools.utils.UpdateChecker;
 import net.kokoricraft.holotools.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
-import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class HoloTools extends JavaPlugin {
-
-    public static Holo test;
     private TickManager tickManager;
     private Manager manager;
     private CompatManager compatManager;
@@ -30,6 +27,9 @@ public final class HoloTools extends JavaPlugin {
     private DataManager dataManager;
     private ConfigManager configManager;
     private LangManager langManager;
+    private UpdateChecker updateChecker;
+    public boolean UPDATED = true;
+    public String VERSION;
 
     @Override
     public void onEnable() {
@@ -38,6 +38,15 @@ public final class HoloTools extends JavaPlugin {
         initClass();
         initListeners();
         checkPlayers();
+
+        updateChecker = new UpdateChecker(this, 119315);
+        updateChecker.getVersion(version -> {
+            VERSION = version;
+            if(!getDescription().getVersion().equals(version)) {
+                UPDATED = false;
+                updateChecker.sendMessage(Bukkit.getConsoleSender(), UPDATED, version);
+            }
+        });
     }
 
     @Override
@@ -76,6 +85,7 @@ public final class HoloTools extends JavaPlugin {
         PluginManager pm = Bukkit.getPluginManager();
         pm.registerEvents(new HoloListener(this), this);
         pm.registerEvents(new HoloCrafterListener(this), this);
+        pm.registerEvents(new PlayerListener(this), this);
     }
 
     private void checkPlayers(){
@@ -115,6 +125,10 @@ public final class HoloTools extends JavaPlugin {
     }
     public LangManager getLangManager() {
         return langManager;
+    }
+
+    public UpdateChecker getUpdateChecker(){
+        return updateChecker;
     }
 
     public static HoloTools getInstance(){

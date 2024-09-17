@@ -55,7 +55,8 @@ public class HoloWardrobe extends Holo implements HoloBase {
             to.setColor(colors.getColor(toSlot).selected());
         }
 
-        onVerticalSlot(0, getVerticalSlot());
+        if(plugin.getConfigManager().TOOLTIP_ENABLED)
+            onVerticalSlot(0, getVerticalSlot());
     }
 
     @Override
@@ -83,7 +84,9 @@ public class HoloWardrobe extends Holo implements HoloBase {
                 loadArmor.apply(player);
             plugin.getDataManager().saveHoloWardrobe(itemStack, this, "swap wardrobe armor");
         }
-        onVerticalSlot(0, getVerticalSlot());
+
+        if(plugin.getConfigManager().TOOLTIP_ENABLED)
+            onVerticalSlot(0, getVerticalSlot());
     }
 
     @Override
@@ -106,7 +109,9 @@ public class HoloWardrobe extends Holo implements HoloBase {
         if(visible){
             spawn(player);
             wardrobeSlots.values().forEach(HoloWardrobeSlot::spawnContent);
-            tooltip.spawn();
+
+            if(plugin.getConfigManager().TOOLTIP_ENABLED)
+                tooltip.spawn();
         }else {
             this.shouldRemove = true;
             remove("remove set visible false wardrobe");
@@ -122,6 +127,8 @@ public class HoloWardrobe extends Holo implements HoloBase {
     @Override
     public void tick(){
         super.tick();
+
+        if(!plugin.getConfigManager().TOOLTIP_ENABLED) return;
 
         int vertical_slot = getVerticalSlot();
 

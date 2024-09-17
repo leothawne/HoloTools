@@ -21,10 +21,12 @@ public class ConfigManager {
     private final HoloTools plugin;
     public String LANG = "en";
     public boolean HOLO_VISIBLE_FOR_EVERYONE;
+    public boolean UPDATE_CHECKER;
     public NekoItem CRAFTER_ITEM;
     public List<HoloPanelsColors> CRAFTER_PANELS_COLORS;
     public NekoItem WARDROBE_ITEM;
     public List<HoloPanelsColors> WARDROBE_PANELS_COLORS;
+    public boolean TOOLTIP_ENABLED;
 
     public static final DualColor DUAL_COLOR_DEF = new DualColor(HoloColors.WHITE.getColor(), HoloColors.WHITE_SELECTED.getColor());
 
@@ -39,6 +41,7 @@ public class ConfigManager {
 
         LANG = config.getString("lang", "en");
         HOLO_VISIBLE_FOR_EVERYONE = config.getBoolean("holos.visible_for_everyone", false);
+        UPDATE_CHECKER = config.getBoolean("update_checker", true);
         config.update();
 
         //Crafter configuration.
@@ -61,6 +64,8 @@ public class ConfigManager {
         WARDROBE_ITEM = new NekoItem(plugin, wardrobe.getConfigurationSection("item"));
         WARDROBE_ITEM.setTag("holo", "yes");
         WARDROBE_ITEM.setTag("holo_wardrobe", new JsonObject().toString());
+
+        TOOLTIP_ENABLED = wardrobe.getBoolean("tooltip.enabled", true);
 
         if(!wardrobe.contains("colors_lists"))
             generateDefaultConfig(wardrobe, HoloType.HOLOWARDROBE);

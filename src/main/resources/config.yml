@@ -1,4 +1,8 @@
 config_version: 0
+
 lang: en
+
 holos:
   visible_for_everyone: false
+
+update_checker: true

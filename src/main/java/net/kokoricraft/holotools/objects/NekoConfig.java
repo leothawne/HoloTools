@@ -163,6 +163,16 @@ public class NekoConfig {
 		return configFile.getPath();
 	}
 
+	public void setInlineComments(String path, List<String> comments){
+		config.setInlineComments(path, comments);
+		needUpdate = true;
+	}
+
+	public void setComments(String path, List<String> comments){
+		config.setComments(path, comments);
+		needUpdate = true;
+	}
+
 	public static File convertInputStreamToFile(InputStream inputStream, String fileName) throws IOException {
 		File tempFile = File.createTempFile(fileName, null);
 

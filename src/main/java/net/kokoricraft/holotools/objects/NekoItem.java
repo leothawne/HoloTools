@@ -78,4 +78,24 @@ public class NekoItem {
 
         return itemStack;
     }
+
+    public ItemStack getItem(String key, Object value){
+        ItemStack item = getItem();
+        ItemMeta meta = item.getItemMeta();
+
+        assert meta != null;
+        PersistentDataContainer container = meta.getPersistentDataContainer();
+
+        NamespacedKey namespacedKey = new NamespacedKey(plugin, key);
+
+        if(value instanceof Integer integer){
+            container.set(namespacedKey, PersistentDataType.INTEGER, integer);
+        }
+
+        if(value instanceof String string){
+            container.set(namespacedKey, PersistentDataType.STRING, string);
+        }
+        item.setItemMeta(meta);
+        return item;
+    }
 }

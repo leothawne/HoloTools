@@ -2,6 +2,7 @@ package net.kokoricraft.holotools;
 
 import net.kokoricraft.holotools.commands.Commands;
 import net.kokoricraft.holotools.commands.CommandsCompleter;
+import net.kokoricraft.holotools.data.PlayerManager;
 import net.kokoricraft.holotools.interfaces.Tickable;
 import net.kokoricraft.holotools.listeners.HoloCrafterListener;
 import net.kokoricraft.holotools.listeners.HoloListener;
@@ -25,6 +26,7 @@ public final class HoloTools extends JavaPlugin {
     private CraftItemsUtils craftItemsUtils;
     private HoloManager holoManager;
     private DataManager dataManager;
+    private PlayerManager playerManager;
     private ConfigManager configManager;
     private LangManager langManager;
     private UpdateChecker updateChecker;
@@ -47,6 +49,8 @@ public final class HoloTools extends JavaPlugin {
                 updateChecker.sendMessage(Bukkit.getConsoleSender(), UPDATED, version);
             }
         });
+
+        Bukkit.getOnlinePlayers().forEach(player -> playerManager.getPlayer(player));
     }
 
     @Override
@@ -74,8 +78,9 @@ public final class HoloTools extends JavaPlugin {
         utils = new Utils(this);
         craftItemsUtils = new CraftItemsUtils(this);
         holoManager = new HoloManager(this);
-        dataManager = new DataManager(this);
         configManager = new ConfigManager(this);
+        dataManager = new DataManager(this);
+        playerManager = new PlayerManager(this);
         langManager = new LangManager(this);
 
         new Metrics(this, 23286);
@@ -125,6 +130,9 @@ public final class HoloTools extends JavaPlugin {
     }
     public LangManager getLangManager() {
         return langManager;
+    }
+    public PlayerManager getPlayerManager(){
+        return playerManager;
     }
 
     public UpdateChecker getUpdateChecker(){

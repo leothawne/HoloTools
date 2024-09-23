@@ -3,6 +3,7 @@ package net.kokoricraft.holotools.listeners;
 import net.kokoricraft.holotools.HoloTools;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 public class PlayerListener implements Listener {
@@ -16,5 +17,10 @@ public class PlayerListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event){
         if(!event.getPlayer().isOp() && !event.getPlayer().hasPermission("*")) return;
         plugin.getUpdateChecker().sendMessage(event.getPlayer(), plugin.UPDATED, plugin.VERSION);
+    }
+
+    @EventHandler
+    public void onPlayerPreJoin(AsyncPlayerPreLoginEvent event){
+        plugin.getPlayerManager().getPlayer(event.getUniqueId());
     }
 }

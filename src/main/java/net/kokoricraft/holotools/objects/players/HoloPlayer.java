@@ -14,7 +14,15 @@ public class HoloPlayer {
         this.uuid = uuid;
     }
 
-    public void setData(String key, JsonObject jsonObject){
-        this.data.put(key, jsonObject);
+    public void setData(String id, JsonObject jsonObject){
+        this.data.put(id, jsonObject);
+    }
+
+    public Map<String, JsonObject> getData(){
+        return data;
+    }
+
+    public UUID getUUID(){
+        return uuid;
     }
 }

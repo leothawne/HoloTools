@@ -2,9 +2,11 @@ package net.kokoricraft.holotools.managers;
 
 import com.google.gson.JsonObject;
 import net.kokoricraft.holotools.HoloTools;
+import net.kokoricraft.holotools.data.StorageConfig;
 import net.kokoricraft.holotools.enums.HoloColors;
 import net.kokoricraft.holotools.enums.HoloType;
 import net.kokoricraft.holotools.enums.StorageMode;
+import net.kokoricraft.holotools.enums.StorageType;
 import net.kokoricraft.holotools.objects.colors.DualColor;
 import net.kokoricraft.holotools.objects.NekoConfig;
 import net.kokoricraft.holotools.objects.NekoItem;
@@ -29,6 +31,8 @@ public class ConfigManager {
     public List<HoloPanelsColors> WARDROBE_PANELS_COLORS;
     public boolean TOOLTIP_ENABLED;
     public StorageMode STORAGE_MODE = StorageMode.ITEM;
+    public StorageType STORAGE_TYPE = StorageType.YAML;
+    public StorageConfig STORAGE_CONFIG;
 
     public static final DualColor DUAL_COLOR_DEF = new DualColor(HoloColors.WHITE.getColor(), HoloColors.WHITE_SELECTED.getColor());
 
@@ -43,6 +47,15 @@ public class ConfigManager {
 
         LANG = config.getString("lang", "en");
         HOLO_VISIBLE_FOR_EVERYONE = config.getBoolean("holos.visible_for_everyone", false);
+
+        STORAGE_MODE = StorageMode.valueOf(config.getString("storage.mode", "item").toUpperCase());
+        STORAGE_TYPE = StorageType.valueOf(config.getString("storage.type", "yaml").toUpperCase());
+
+        if(!config.contains("storage.config"))
+            generateDefaultStorageConfig(config);
+
+        STORAGE_CONFIG = new StorageConfig(config.getConfigurationSection("storage.config"));
+
         UPDATE_CHECKER = config.getBoolean("update_checker", true);
         config.update();
 
@@ -99,6 +112,17 @@ public class ConfigManager {
         config.set("colors_lists.light_blue.selected.hex", "#5be4ec");
         config.set("colors_lists.light_blue.selected.alpha", 236);
 
+        config.forceUpdate();
+    }
+
+    private void generateDefaultStorageConfig(NekoConfig config){
+        String path = "storage.config.";
+
+        config.set(path+"host", "localhost");
+        config.set(path+"port", "3306");
+        config.set(path+"user", "user");
+        config.set(path+"password", "password");
+        config.set(path+"database", "database");
         config.forceUpdate();
     }
 

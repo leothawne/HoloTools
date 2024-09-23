@@ -3,11 +3,16 @@ package net.kokoricraft.holotools.managers;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.kokoricraft.holotools.HoloTools;
+import net.kokoricraft.holotools.data.Storage;
+import net.kokoricraft.holotools.data.types.MySqlStorage;
+import net.kokoricraft.holotools.data.types.YamlStorage;
+import net.kokoricraft.holotools.enums.StorageMode;
 import net.kokoricraft.holotools.objects.holowardrobe.WardrobeContent;
 import net.kokoricraft.holotools.objects.holocrafter.HoloCrafter;
 import net.kokoricraft.holotools.objects.holocrafter.HoloCrafterSlot;
 import net.kokoricraft.holotools.objects.holowardrobe.HoloWardrobe;
 import net.kokoricraft.holotools.objects.holowardrobe.HoloWardrobeSlot;
+import net.kokoricraft.holotools.objects.players.HoloPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
@@ -26,11 +31,17 @@ public class DataManager {
     private final HoloTools plugin;
     public final NamespacedKey CRAFTER_KEY;
     public final NamespacedKey WARDROBE_KEY;
+    private final Storage storage;
 
     public DataManager(HoloTools plugin){
         this.plugin = plugin;
         CRAFTER_KEY = new NamespacedKey(plugin, "holo_crafter");
         WARDROBE_KEY = new NamespacedKey(plugin, "holo_wardrobe");
+
+        storage = switch (plugin.getConfigManager().STORAGE_TYPE){
+            case YAML -> new YamlStorage();
+            case MYSQL -> new MySqlStorage();
+        };
     }
 
     public void saveHoloCrafter(ItemStack itemStack, HoloCrafter holoCrafter, String reason){
@@ -38,12 +49,26 @@ public class DataManager {
         //Bukkit.broadcastMessage("crafter save for: "+reason);
         Map<Integer, HoloCrafterSlot> slots = holoCrafter.getCrafterSlots();
 
-        if(itemStack == null || slots.isEmpty()) return;
+        JsonObject jsonObject = new JsonObject();
+
+        if(slots.isEmpty()) return;
 
         ItemMeta meta = itemStack.getItemMeta();
         if(meta == null) return;
 
-        JsonObject jsonObject = new JsonObject();
+        int id;
+
+        PersistentDataContainer dataContainer = meta.getPersistentDataContainer();
+        NamespacedKey idKey = new NamespacedKey(plugin, "id");
+
+        if(!dataContainer.has(idKey, PersistentDataType.INTEGER)){
+            id = storage.getNextID();
+        }else {
+            Integer storedID = dataContainer.get(idKey, PersistentDataType.INTEGER);
+            id = Objects.requireNonNullElseGet(storedID, storage::getNextID);
+        }
+
+        meta.getPersistentDataContainer().set(idKey, PersistentDataType.INTEGER, id);
 
         for(int slot = 1; slot < 9; slot++){
             if(!slots.containsKey(slot)) continue;
@@ -53,8 +78,22 @@ public class DataManager {
             jsonObject.addProperty("slot_"+slot, ((Keyed)slots.get(slot).getRecipe()).getKey().toString());
         }
 
-        meta.getPersistentDataContainer().set(CRAFTER_KEY, PersistentDataType.STRING, jsonObject.toString());
+        if(plugin.getConfigManager().STORAGE_MODE == StorageMode.ITEM){
+            meta.getPersistentDataContainer().set(CRAFTER_KEY, PersistentDataType.STRING, jsonObject.toString());
+        }
+
+        if(plugin.getConfigManager().STORAGE_MODE == StorageMode.PLAYER){
+            HoloPlayer holoPlayer = plugin.getPlayerManager().getPlayer(player);
+            holoPlayer.setData("holo_crafter", jsonObject);
+            storage.savePlayer(holoPlayer);
+        }
+
+        if(plugin.getConfigManager().STORAGE_MODE == StorageMode.UUID){
+            storage.saveHolo(id, jsonObject);
+        }
+
         itemStack.setItemMeta(meta);
+
         if(!plugin.getHoloManager().isHolo(player.getInventory().getItemInMainHand())) return;
 
         player.getInventory().setItemInMainHand(itemStack);
@@ -68,9 +107,35 @@ public class DataManager {
 
         PersistentDataContainer dataContainer = meta.getPersistentDataContainer();
 
+        int id;
+
+        NamespacedKey idKey = new NamespacedKey(plugin, "id");
+
+        if(!dataContainer.has(idKey, PersistentDataType.INTEGER)){
+            id = storage.getNextID();
+        }else {
+            Integer storedID = dataContainer.get(idKey, PersistentDataType.INTEGER);
+            id = Objects.requireNonNullElseGet(storedID, storage::getNextID);
+        }
+
         if(!dataContainer.has(CRAFTER_KEY, PersistentDataType.STRING)) return null;
 
-        JsonObject jsonObject = JsonParser.parseString(Objects.requireNonNull(dataContainer.get(CRAFTER_KEY, PersistentDataType.STRING))).getAsJsonObject();
+        dataContainer.set(idKey, PersistentDataType.INTEGER, id);
+
+        JsonObject jsonObject = new JsonObject();
+
+        if(plugin.getConfigManager().STORAGE_MODE == StorageMode.ITEM){
+            jsonObject = JsonParser.parseString(Objects.requireNonNull(dataContainer.get(CRAFTER_KEY, PersistentDataType.STRING))).getAsJsonObject();
+        }
+
+        if(plugin.getConfigManager().STORAGE_MODE == StorageMode.PLAYER){
+            HoloPlayer holoPlayer = plugin.getPlayerManager().getPlayer(player);
+            jsonObject = holoPlayer.getData().getOrDefault("holo_crafter", new JsonObject());
+        }
+
+        if(plugin.getConfigManager().STORAGE_MODE == StorageMode.UUID){
+            jsonObject = storage.getHolo(id);
+        }
 
         Map<Integer, Recipe> recipeMap = new HashMap<>();
 
@@ -90,34 +155,59 @@ public class DataManager {
             recipeMap.put(slot, recipe);
         }
 
+        itemStack.setItemMeta(meta);
+
         return new HoloCrafter(player, recipeMap, itemStack);
     }
 
     public void saveHoloWardrobe(ItemStack itemStack, HoloWardrobe wardrobe, String reason){
         Player player = wardrobe.getPlayer();
-        //plugin.getUtils().debug("wardrobe save for: "+reason);
         Map<Integer, HoloWardrobeSlot> slots = wardrobe.getWardrobeSlots();
 
         if(itemStack == null || slots.isEmpty()) return;
 
         ItemMeta meta = itemStack.getItemMeta();
-        if(meta == null) return;
+        if (meta == null) return;
 
         JsonObject jsonObject = new JsonObject();
+        int id;
 
-        for(int slot = 0; slot < 9; slot++){
+        PersistentDataContainer dataContainer = meta.getPersistentDataContainer();
+        NamespacedKey idKey = new NamespacedKey(plugin, "id");
+
+        if(!dataContainer.has(idKey, PersistentDataType.INTEGER)){
+            id = storage.getNextID();
+        }else {
+            Integer storedID = dataContainer.get(idKey, PersistentDataType.INTEGER);
+            id = Objects.requireNonNullElseGet(storedID, storage::getNextID);
+        }
+
+        meta.getPersistentDataContainer().set(idKey, PersistentDataType.INTEGER, id);
+
+        for(int slot = 0; slot < 9; slot++) {
             if(!slots.containsKey(slot)) continue;
             WardrobeContent content = slots.get(slot).getContent();
 
             if(content == null) continue;
 
-            jsonObject.addProperty("slot_"+slot, content.getToJson().toString());
+            jsonObject.addProperty("slot_" + slot, content.getToJson().toString());
         }
 
+        if(plugin.getConfigManager().STORAGE_MODE == StorageMode.ITEM){
+            meta.getPersistentDataContainer().set(WARDROBE_KEY, PersistentDataType.STRING, jsonObject.toString());
+        }
 
-        meta.getPersistentDataContainer().set(WARDROBE_KEY, PersistentDataType.STRING, jsonObject.toString());
+        if(plugin.getConfigManager().STORAGE_MODE == StorageMode.PLAYER){
+            HoloPlayer holoPlayer = plugin.getPlayerManager().getPlayer(player);
+            holoPlayer.setData("holo_wardrobe", jsonObject);
+            storage.savePlayer(holoPlayer);
+        }
+
+        if(plugin.getConfigManager().STORAGE_MODE == StorageMode.UUID){
+            storage.saveHolo(id, jsonObject);
+        }
+
         itemStack.setItemMeta(meta);
-
 
         if(!plugin.getHoloManager().isHolo(player.getInventory().getItemInMainHand())) return;
         player.getInventory().setItemInMainHand(itemStack);
@@ -130,16 +220,40 @@ public class DataManager {
         if(meta == null) return null;
 
         PersistentDataContainer dataContainer = meta.getPersistentDataContainer();
+        int id;
+
+        NamespacedKey idKey = new NamespacedKey(plugin, "id");
+
+        if(!dataContainer.has(idKey, PersistentDataType.INTEGER)){
+            id = storage.getNextID();
+        }else {
+            Integer storedID = dataContainer.get(idKey, PersistentDataType.INTEGER);
+            id = Objects.requireNonNullElseGet(storedID, storage::getNextID);
+        }
 
         if(!dataContainer.has(WARDROBE_KEY, PersistentDataType.STRING)) return null;
 
-        JsonObject jsonObject = JsonParser.parseString(Objects.requireNonNull(dataContainer.get(WARDROBE_KEY, PersistentDataType.STRING))).getAsJsonObject();
+        dataContainer.set(idKey, PersistentDataType.INTEGER, id);
 
+        JsonObject jsonObject = new JsonObject();
+
+        if(plugin.getConfigManager().STORAGE_MODE == StorageMode.ITEM){
+            jsonObject = JsonParser.parseString(Objects.requireNonNull(dataContainer.get(WARDROBE_KEY, PersistentDataType.STRING))).getAsJsonObject();
+        }
+
+        if(plugin.getConfigManager().STORAGE_MODE == StorageMode.PLAYER){
+            HoloPlayer holoPlayer = plugin.getPlayerManager().getPlayer(player);
+            jsonObject = holoPlayer.getData().getOrDefault("holo_wardrobe", new JsonObject());
+        }
+
+        if(plugin.getConfigManager().STORAGE_MODE == StorageMode.UUID){
+            jsonObject = storage.getHolo(id);
+        }
 
         Map<Integer, WardrobeContent> contentMap = new HashMap<>();
 
         for(int slot = 0; slot < 9; slot++){
-            String slot_key = "slot_"+slot;
+            String slot_key = "slot_" + slot;
 
             if(!jsonObject.has(slot_key)) continue;
             String stringContent = jsonObject.get(slot_key).getAsString();
@@ -151,6 +265,12 @@ public class DataManager {
             contentMap.put(slot, content);
         }
 
+        itemStack.setItemMeta(meta);
+
         return new HoloWardrobe(player, itemStack, contentMap);
+    }
+
+    public Storage getStorage(){
+        return storage;
     }
 }

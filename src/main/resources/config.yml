@@ -1,8 +1,26 @@
+#No modify this please!
 config_version: 0
 
+#Languages: en, es. (If you want to contribute with a new language, let us know on Discord!)
 lang: en
 
+#Should the holos be visible to everyone? (experimental feature)
 holos:
   visible_for_everyone: false
 
+storage:
+  #avaible modes item, player, uuid
+  #
+  mode: item
+  #avaible types yaml, coming soon others types
+  type: yaml
+  #coming soon for others types
+  config:
+    host: localhost
+    port: '3306'
+    user: user
+    password: '123456'
+    database: database
+
+#Send message in console and admins when exist a new update
 update_checker: true

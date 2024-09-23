@@ -240,8 +240,8 @@ public class Commands implements CommandExecutor {
 
         ItemStack item;
         switch(itemName){
-            case "holocrafter" -> item = plugin.getConfigManager().CRAFTER_ITEM.getItem();
-            case "holowardrobe" -> item = plugin.getConfigManager().WARDROBE_ITEM.getItem();
+            case "holocrafter" -> item = plugin.getConfigManager().CRAFTER_ITEM.getItem("id", plugin.getDataManager().getStorage().getNextID());
+            case "holowardrobe" -> item = plugin.getConfigManager().WARDROBE_ITEM.getItem("id", plugin.getDataManager().getStorage().getNextID());
             default -> {
                 sender.sendMessage(plugin.getUtils().color("&cTool does not exist."));
                 return;

@@ -1,5 +1,8 @@
 package net.kokoricraft.holotools.version;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mojang.math.Transformation;
 import io.netty.channel.*;
 import net.kokoricraft.holotools.events.InventoryUpdateEvent;
@@ -35,6 +38,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.*;
 
 public class v1_20_R3 implements Compat{
@@ -171,7 +175,30 @@ public class v1_20_R3 implements Compat{
 
         for(IChatBaseComponent baseComponent : list){
             String json = CraftChatMessage.toJSON(baseComponent);
-            components.add(ComponentSerializer.deserialize(json));
+
+            BaseComponent component = null;
+
+            boolean isString = true;
+
+            try{
+                ComponentSerializer.class.getMethod("deserialize", String.class);
+            }catch (Exception exception){
+                isString = false;
+            }
+
+            if(isString){
+                component = ComponentSerializer.deserialize(json);
+            }else {
+                try{
+                    Method deserialize = ComponentSerializer.class.getMethod("parse", String.class);
+                    component = ((BaseComponent[]) deserialize.invoke(null, json))[0];
+                }catch (Exception exception){
+                    exception.printStackTrace();
+                }
+            }
+
+            if(component != null)
+                components.add(component);
         }
         return components;
     }
@@ -346,9 +373,21 @@ public class v1_20_R3 implements Compat{
         public void setText(List<BaseComponent> components) {
             List<IChatBaseComponent> iChatBaseComponents = new ArrayList<>();
 
+            boolean isJson = true;
+
+            try{
+                ComponentSerializer.class.getDeclaredMethod("toJson", BaseComponent.class);
+            }catch (Exception ignored){
+                isJson = false;
+            }
+
             for(BaseComponent baseComponent : components){
-                String json = ComponentSerializer.toJson(baseComponent).toString();
-                iChatBaseComponents.add(CraftChatMessage.fromJSONOrString(json, true));
+                if(isJson){
+                    String json = ComponentSerializer.toJson(baseComponent).toString();
+                    iChatBaseComponents.add(CraftChatMessage.fromJSONOrString(json, true));
+                }else {
+                    iChatBaseComponents.add(CraftChatMessage.fromJSONOrString(ComponentSerializer.toString(baseComponent), true));
+                }
             }
 
             IChatBaseComponent empty = IChatBaseComponent.i();

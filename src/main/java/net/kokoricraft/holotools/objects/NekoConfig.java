@@ -118,8 +118,8 @@ public class NekoConfig {
 		config.set(path, object);
 	}
 	
-	public Boolean contains(String paht) {
-		return config.contains(paht);
+	public Boolean contains(String path) {
+		return config.contains(path);
 	}
 	
 	public void update() {

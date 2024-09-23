@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import net.kokoricraft.holotools.HoloTools;
 import net.kokoricraft.holotools.enums.HoloColors;
 import net.kokoricraft.holotools.enums.HoloType;
+import net.kokoricraft.holotools.enums.StorageMode;
 import net.kokoricraft.holotools.objects.colors.DualColor;
 import net.kokoricraft.holotools.objects.NekoConfig;
 import net.kokoricraft.holotools.objects.NekoItem;
@@ -27,6 +28,7 @@ public class ConfigManager {
     public NekoItem WARDROBE_ITEM;
     public List<HoloPanelsColors> WARDROBE_PANELS_COLORS;
     public boolean TOOLTIP_ENABLED;
+    public StorageMode STORAGE_MODE = StorageMode.ITEM;
 
     public static final DualColor DUAL_COLOR_DEF = new DualColor(HoloColors.WHITE.getColor(), HoloColors.WHITE_SELECTED.getColor());
 

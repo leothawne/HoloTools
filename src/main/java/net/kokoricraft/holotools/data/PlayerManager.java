@@ -23,4 +23,8 @@ public class PlayerManager {
     public HoloPlayer getPlayer(Player player){
         return getPlayer(player.getUniqueId());
     }
+
+    public void remove(UUID uuid) {
+        players.remove(uuid);
+    }
 }

@@ -5,6 +5,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerListener implements Listener {
     private final HoloTools plugin;
@@ -22,5 +23,10 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerPreJoin(AsyncPlayerPreLoginEvent event){
         plugin.getPlayerManager().getPlayer(event.getUniqueId());
+    }
+
+    @EventHandler
+    public void onPlayerLeave(PlayerQuitEvent event){
+        plugin.getPlayerManager().remove(event.getPlayer().getUniqueId());
     }
 }

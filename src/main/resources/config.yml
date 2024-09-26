@@ -1,5 +1,5 @@
-#No modify this please!
-config_version: 0
+#Do not modify this please!
+config_version: 1
 
 #Languages: en, es. (If you want to contribute with a new language, let us know on Discord!)
 lang: en
@@ -9,12 +9,14 @@ holos:
   visible_for_everyone: false
 
 storage:
-  #avaible modes item, player, uuid
-  #
+  #available modes: item, player, uuid
+  #item: Saves all data inside the ItemStack and ignores the type config.
+  #player: Saves all data using the type config. Holos are also per player, and everyone will see the same holo.
+  #uuid: Saves all data using the type config. Holos also have a unique UUID so that each item has a different holo, similar to item mode.
   mode: item
-  #avaible types yaml, coming soon others types
+  #available types: yaml and mysql, others coming soon
   type: yaml
-  #coming soon for others types
+  #config for mysql type and others in the future
   config:
     host: localhost
     port: '3306'
@@ -22,5 +24,5 @@ storage:
     password: '123456'
     database: database
 
-#Send message in console and admins when exist a new update
+#Send a message in the console and to admins when a new update is available
 update_checker: true

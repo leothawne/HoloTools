@@ -111,87 +111,23 @@ public class Commands implements CommandExecutor {
     }
 
     public void test2(CommandSender sender, String[] args){
+        if(!(sender instanceof Player player)) return;
+        Location location = player.getLocation();
 
-        float size = 6;
-        float distance = -3f;
-        float height = -2f;
 
         List<HoloTextDisplay> displays = new ArrayList<>();
 
-        for(Player player : Bukkit.getOnlinePlayers()){
-            HoloTextDisplay d1 = plugin.getCompatManager().createTextDisplay(List.of(player), player.getLocation(), 0, 0);
-            d1.setColor(HoloColor.BLACK);
-            d1.setText("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-            d1.setLineWidth(120);
-            d1.setTranslation(0, height, distance);
-            d1.setScale(size, size, size);
-            d1.mount(player);
-            d1.setTextOpacity((byte)20);
-            d1.update();
+        HoloTextDisplay main = plugin.getCompatManager().createTextDisplay(List.of(player), location, 0, 0);
 
-            HoloTextDisplay d2 = plugin.getCompatManager().createTextDisplay(List.of(player), player.getLocation(), 0, 90);
-            d2.setColor(HoloColor.BLACK);
-            d2.setText("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-            d2.setLineWidth(120);
-            d2.setTranslation(0, height, distance);
-            d2.setScale(size, size, size);
-            d2.mount(player);
-            d2.setTextOpacity((byte)20);
-            d2.update();
-
-            HoloTextDisplay d3 = plugin.getCompatManager().createTextDisplay(List.of(player), player.getLocation(), 0, 180);
-            d3.setColor(HoloColor.BLACK);
-            d3.setText("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-            d3.setLineWidth(120);
-            d3.setTranslation(0, height, distance);
-            d3.setScale(4, 4, 3);
-            d3.mount(player);
-            d3.setTextOpacity((byte)20);
-            d3.update();
-
-            HoloTextDisplay d4 = plugin.getCompatManager().createTextDisplay(List.of(player), player.getLocation(), 0, 270);
-            d4.setColor(HoloColor.BLACK);
-            d4.setText("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-            d4.setLineWidth(120);
-            d4.setTranslation(0, height, distance);
-            d4.setScale(size, size, size);
-            d4.mount(player);
-            d4.setTextOpacity((byte)20);
-            d4.update();
-
-            HoloTextDisplay d5 = plugin.getCompatManager().createTextDisplay(List.of(player), player.getLocation(), 90, 0);
-            d5.setColor(HoloColor.BLACK);
-            d5.setText("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-            d5.setLineWidth(120);
-            d5.setTranslation(0, distance, -2);
-            d5.setScale(size, size, size);
-            d5.mount(player);
-            d5.setTextOpacity((byte)20);
-            d5.update();
-
-            HoloTextDisplay d6 = plugin.getCompatManager().createTextDisplay(List.of(player), player.getLocation(), -90, 0);
-            d6.setColor(HoloColor.BLACK);
-            d6.setText("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-            d6.setLineWidth(120);
-            d6.setTranslation(0, distance, -2);
-            d6.setScale(size, size, size);
-            d6.mount(player);
-            d6.setTextOpacity((byte)20);
-            d6.update();
-
-            displays.add(d1);
-            displays.add(d2);
-            displays.add(d3);
-            displays.add(d4);
-            displays.add(d5);
-            displays.add(d6);
-        }
-
-
+        main.setBillboard(Display.Billboard.HORIZONTAL);
+        main.setText(".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n");
+        main.setColor(HoloColor.fromARGB(200, 255, 0, 0));
+        main.setTextOpacity((byte) 20);
+        main.update();
 
         Bukkit.getScheduler().runTaskLater(plugin, () ->{
             displays.forEach(HoloTextDisplay::remove);
-        }, 20 * 60);
+        }, 20 * 20);
     }
 
     public String getText(int i){

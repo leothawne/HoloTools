@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'net.kokoricraft'
-version = '1.1.5'
+version = '1.1.6'
 
 repositories {
     mavenCentral()
@@ -68,7 +68,7 @@ jar {
     if (System.getProperty("user.name") == "nya") {
         destinationDirectory = file("${System.getProperty('user.home')}/Desktop")
     } else {
-        destinationDirectory = file("D:/servers/1.21/plugins")
+        destinationDirectory = file("D:/servers/1.21.3/plugins")
     }
     from {
         subprojects.collect { it.sourceSets.main.output }

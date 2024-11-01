@@ -9,10 +9,13 @@ import net.kokoricraft.holotools.events.InventoryUpdateEvent;
 import net.kokoricraft.holotools.utils.objects.HoloColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
+import net.minecraft.core.BlockPosition;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.chat.ChatComponentUtils;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.custom.GameTestAddMarkerDebugPayload;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.server.level.WorldServer;
@@ -22,14 +25,18 @@ import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.EntityHuman;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.World;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftItemStack;
-import org.bukkit.craftbukkit.v1_20_R3.util.CraftChatMessage;
+import org.bukkit.craftbukkit.v1_21_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_21_R2.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_21_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_21_R2.entity.CraftTextDisplay;
+import org.bukkit.craftbukkit.v1_21_R2.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_21_R2.util.CraftChatMessage;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
@@ -38,11 +45,10 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.*;
 
-public class v1_20_R3 implements Compat{
-    public final Map<Integer, List<Entity>> passengers = new HashMap<>();
+public class v1_21_R2 implements Compat{
+    private final Map<Integer, List<Entity>> passengers = new HashMap<>();
 
     @Override
     public HoloTextDisplay createTextDisplay(List<Player> players, Location location, float yaw, float pitch) {
@@ -58,6 +64,7 @@ public class v1_20_R3 implements Compat{
     public void initPacketsRegister(Player player){
         try{
             ChannelPipeline pipeline = getPipeline((CraftPlayer) player);
+
             pipeline.addBefore("packet_handler", String.format("Holo_%s", player.getName()), new ChannelDuplexHandler(){
                 @Override
                 public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
@@ -68,10 +75,35 @@ public class v1_20_R3 implements Compat{
                         }
 
                         if(name.endsWith("ClientboundSetPassengersPacket") || name.endsWith("PacketPlayOutMount")){
-                           onMountPacketSend(msg, player);
+                            onMountPacketSend(msg, player);
                         }
                     }
+
                     super.write(ctx, msg, promise);
+                }
+
+                @Override
+                public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+                    if(msg instanceof Packet<?> packet){
+                        String name = packet.getClass().getName();
+
+                        if(name.endsWith("PacketPlayInLook")) {
+                            PacketPlayInFlying.PacketPlayInLook awa = (PacketPlayInFlying.PacketPlayInLook)msg;
+                            //Bukkit.broadcastMessage("rotation: "+awa.d+" "+awa.e);
+                        }
+//                        if(!name.contains("PacketPlayInPosition") && !name.contains("PacketPlayInLook")){
+//                            Bukkit.getScheduler().runTaskAsynchronously(Bukkit.getPluginManager().getPlugin("HoloTools"), () ->{
+//                                Bukkit.broadcastMessage(name);
+//                            });
+//                            if(name.contains("ServerboundClientInformationPacket")){
+//                                ServerboundClientInformationPacket packet1 = (ServerboundClientInformationPacket)msg;
+//                            }
+//                        }
+
+
+                    }
+
+                    super.channelRead(ctx, msg);
                 }
             });
         }catch (Exception exception){
@@ -79,12 +111,91 @@ public class v1_20_R3 implements Compat{
         }
     }
 
-    public void onMountPacketSend(Object msg, Player player){
-        boolean isPaper = msg.getClass().getName().endsWith("ClientboundSetPassengersPacket");
-        String vehicleFieldName = isPaper ? "vehicle" : "a";
-        String passengersFieldName = isPaper ? "passengers" : "b";
 
-        try {
+    public void test(Player player, boolean creative, HoloItemDisplay holo, ItemDisplay armorStand){
+        HoloDisplayItem entity = (HoloDisplayItem) createItemDisplay(List.of(player), player.getLocation(), 0, 0);
+        try{
+            entity.setScale(3, 3, 3);
+            entity.mount(player);
+            entity.mount(player);
+            entity.mount(player);
+            entity.mount(player);
+            entity.mount(player);
+            entity.mount(player);
+            entity.mount(player);
+            entity.update();
+            PacketPlayOutMount mount = new PacketPlayOutMount(((CraftPlayer)player).getHandle());
+            Field passengers = mount.getClass().getDeclaredField("c");
+            passengers.setAccessible(true);
+            passengers.set(mount, new int[]{getEntityID(entity.getEntity()), getEntityID(entity.getEntity()), getEntityID(entity.getEntity()), getEntityID(entity.getEntity()), getEntityID(entity.getEntity()), getEntityID(entity.getEntity())});
+            sendPacket(List.of(player), mount);
+        }catch (Exception exception){
+            exception.printStackTrace();
+        }
+
+//        boolean enabled = !creative;
+//        armorStand.addPassenger(player);
+//
+//        if(enabled){
+//            PacketPlayOutGameStateChange packet = new PacketPlayOutGameStateChange(PacketPlayOutGameStateChange.e, EnumGamemode.d.a());
+//            sendPacket(List.of(player), packet);
+//
+//            PacketPlayOutCamera camera = new PacketPlayOutCamera(((HoloDisplayItem)holo).getEntity());
+//            sendPacket(List.of(player), camera);
+//            mount(List.of(player), player, ((HoloDisplayItem)holo).getEntity());
+//        }else{
+//            PacketPlayOutGameStateChange packet = new PacketPlayOutGameStateChange(PacketPlayOutGameStateChange.e,EnumGamemode.b.a());
+//            sendPacket(List.of(player), packet);
+//            Entity armor = ((CraftPlayer)player).getHandle();
+//            PacketPlayOutCamera camera = new PacketPlayOutCamera(armor);
+//            sendPacket(List.of(player), camera);
+//        }
+
+    }
+
+    public void test2(Player player){
+        GameTestAddMarkerDebugPayload addMarker = new GameTestAddMarkerDebugPayload(asd(player),
+                0x80ffcccc, "Puto el que lea", 0xFFFFFF);
+
+        ClientboundCustomPayloadPacket packet = new ClientboundCustomPayloadPacket(addMarker);
+
+        sendPacket(List.of(player), packet);
+    }
+
+    private BlockPosition asd(Player player){
+        Location location = player.getLocation();
+        return new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+    }
+
+    private ChannelPipeline getPipeline(CraftPlayer player){
+        return getChannel(player).pipeline();
+    }
+
+    public Channel getChannel(CraftPlayer player){
+        try{
+            ServerCommonPacketListenerImpl serverCommonPacketListener = player.getHandle().f;
+
+            Field networkManagerField = ServerCommonPacketListenerImpl.class.getDeclaredField("e");// connection
+            networkManagerField.setAccessible(true);
+
+            NetworkManager networkManager = (NetworkManager) networkManagerField.get(serverCommonPacketListener);
+
+            return networkManager.n;
+        }catch (Exception ignore){}
+        return null;
+    }
+
+    private void onPacketSend(Player player) {
+        InventoryUpdateEvent event = new InventoryUpdateEvent(player);
+        Bukkit.getPluginManager().callEvent(event);
+    }
+
+    private void onMountPacketSend(Object msg, Player player){
+        boolean isPaper = msg.getClass().getName().endsWith("ClientboundSetPassengersPacket");
+        String vehicleFieldName = isPaper ? "vehicle" : "b";
+        String passengersFieldName = isPaper ? "passengers" : "c";
+
+        try{
             Field targetField = msg.getClass().getDeclaredField(vehicleFieldName);
             targetField.setAccessible(true);
             int targetID = targetField.getInt(msg);
@@ -101,44 +212,21 @@ public class v1_20_R3 implements Compat{
 
             System.arraycopy(passengersID, 0, newPassengersID, 0, passengersID.length);
 
+
             int index = passengersID.length;
-            for (Entity entity : entities) {
+            for(Entity entity : entities){
                 int entityID = getEntityID(entity);
                 newPassengersID[index++] = entityID;
             }
 
-            passengersField.set(msg, newPassengersID);
+//            if(!player.getName().equals("FavioMC19")){
+//                player.sendMessage("modified array: "+Arrays.toString(newPassengersID));
+//            }
 
-        } catch (Exception exception) {
+            passengersField.set(msg, newPassengersID);
+        }catch(Exception exception) {
             exception.printStackTrace();
         }
-    }
-
-    public int getEntityID(Entity entity){
-        return entity.aj();
-    }
-
-    private ChannelPipeline getPipeline(CraftPlayer player){
-        return getChannel(player).pipeline();
-    }
-
-    public Channel getChannel(CraftPlayer player){
-        try{
-            ServerCommonPacketListenerImpl serverCommonPacketListener = player.getHandle().c;
-
-            Field networkManagerField = ServerCommonPacketListenerImpl.class.getDeclaredField("c");// connection
-            networkManagerField.setAccessible(true);
-
-            NetworkManager networkManager = (NetworkManager) networkManagerField.get(serverCommonPacketListener);
-
-            return networkManager.n;
-        }catch (Exception ignore){}
-        return null;
-    }
-
-    private void onPacketSend(Player player) {
-        InventoryUpdateEvent event = new InventoryUpdateEvent(player);
-        Bukkit.getPluginManager().callEvent(event);
     }
 
     @Override
@@ -146,9 +234,35 @@ public class v1_20_R3 implements Compat{
         Bukkit.getOnlinePlayers().forEach(player -> getPipeline((CraftPlayer) player).remove(String.format("Holo_%s", player.getName())));
     }
 
+    @Override
+    public List<BaseComponent> getToolTip(ItemStack itemStack, Player player, boolean advanced) {
+        net.minecraft.world.item.ItemStack nmsItemStack = CraftItemStack.asNMSCopy(itemStack);
+        World world = ((CraftWorld) player.getWorld()).getHandle();
+
+        EntityHuman entityPlayer =  ((CraftPlayer)player).getHandle();
+
+        List<IChatBaseComponent> list = nmsItemStack.a(Item.b.a(world), entityPlayer, advanced ? TooltipFlag.b : TooltipFlag.a);
+
+        List<BaseComponent> components = new ArrayList<>();
+
+        for(IChatBaseComponent baseComponent : list){
+            String json = CraftChatMessage.toJSON(baseComponent);
+            components.add(ComponentSerializer.deserialize(json));
+        }
+        return components;
+    }
+
+    public int getEntityID(Entity entity){
+        return entity.ar();
+    }
+
+    public DataWatcher getDataWatcher(Entity entity){
+        return entity.au();
+    }
+
     public void sendPacket(List<Player> players, Packet<?> packet){
         players.forEach(player -> {
-            ((CraftPlayer)player).getHandle().c.b(packet);
+            ((CraftPlayer)player).getHandle().f.sendPacket(packet);
         });
     }
 
@@ -159,50 +273,6 @@ public class v1_20_R3 implements Compat{
         passengers.put(target.getEntityId(), entities);
     }
 
-    public DataWatcher getDataWatcher(Entity entity){
-        return entity.an();
-    }
-
-    @Override
-    public List<BaseComponent> getToolTip(ItemStack itemStack, Player player, boolean advanced) {
-        net.minecraft.world.item.ItemStack nmsItemStack = CraftItemStack.asNMSCopy(itemStack);
-
-        EntityHuman entityPlayer =  ((CraftPlayer)player).getHandle();
-
-        List<IChatBaseComponent> list = nmsItemStack.a(entityPlayer, advanced ? TooltipFlag.b : TooltipFlag.a);
-
-        List<BaseComponent> components = new ArrayList<>();
-
-        for(IChatBaseComponent baseComponent : list){
-            String json = CraftChatMessage.toJSON(baseComponent);
-
-            BaseComponent component = null;
-
-            boolean isString = true;
-
-            try{
-                ComponentSerializer.class.getMethod("deserialize", String.class);
-            }catch (Exception exception){
-                isString = false;
-            }
-
-            if(isString){
-                component = ComponentSerializer.deserialize(json);
-            }else {
-                try{
-                    Method deserialize = ComponentSerializer.class.getMethod("parse", String.class);
-                    component = ((BaseComponent[]) deserialize.invoke(null, json))[0];
-                }catch (Exception exception){
-                    exception.printStackTrace();
-                }
-            }
-
-            if(component != null)
-                components.add(component);
-        }
-        return components;
-    }
-
     public void mount(List<Player> players, org.bukkit.entity.Entity target, Entity passenger){
         List<Entity> entities = passengers.getOrDefault(target.getEntityId(), new ArrayList<>());
         if(!entities.contains(passenger))
@@ -210,7 +280,10 @@ public class v1_20_R3 implements Compat{
 
         passengers.put(target.getEntityId(), entities);
 
-        PacketPlayOutMount packet = new PacketPlayOutMount(((CraftPlayer)target).getHandle());
+//        if(target.getName().equals("FavioMC19")){
+//            target.sendMessage("mount packet id: "+getEntityID(passenger));
+//        }
+        PacketPlayOutMount packet = new PacketPlayOutMount(((CraftEntity)target).getHandle());
         sendPacket(players, packet);
     }
 
@@ -219,27 +292,25 @@ public class v1_20_R3 implements Compat{
         private final Display.TextDisplay textDisplay;
         private Location location;
         private final Packet<?> spawnPacket;
-        private final v1_20_R3 manager;
         private org.bukkit.entity.Entity target;
+        private final v1_21_R2 manager;
 
-        public HoloDisplayText(List<Player> players, Location location, float yaw, float pitch, Compat manager){
-            this.manager = (v1_20_R3) manager;
+        public HoloDisplayText(List<Player> players, Location location, float yaw, float pitch, v1_21_R2 manager){
+            this.manager = manager;
             this.players = players;
             this.location = location;
             WorldServer world = ((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle();
-            this.textDisplay = new Display.TextDisplay(EntityTypes.aY, world);
-            spawnPacket =  new PacketPlayOutSpawnEntity(((v1_20_R3) manager).getEntityID(textDisplay), textDisplay.cw(), location.getX(), location.getY(), location.getZ(), yaw, pitch, textDisplay.ai(), 0, textDisplay.dp(), textDisplay.cp());
-
-            ((v1_20_R3) manager).sendPacket(players, spawnPacket);
+            this.textDisplay = new Display.TextDisplay(EntityTypes.bv, world);
+            spawnPacket =  new PacketPlayOutSpawnEntity(manager.getEntityID(textDisplay), textDisplay.cG(), location.getX(), location.getY(), location.getZ(), yaw, pitch, textDisplay.aq(), 0, textDisplay.dz(), textDisplay.cA());
+            manager.sendPacket(players, spawnPacket);
         }
 
         @Override
         public void update(Location location) {
             if(players.isEmpty()) return;
             this.location = location;
-            PacketPlayOutEntityTeleport teleport = new PacketPlayOutEntityTeleport(textDisplay);
-
-            manager.sendPacket(players, teleport);
+//            PacketPlayOutEntityTeleport teleport = new PacketPlayOutEntityTeleport(textDisplay);
+//            manager.sendPacket(players, teleport);
 
             internalUpdate();
         }
@@ -247,22 +318,36 @@ public class v1_20_R3 implements Compat{
         @Override
         public void remove() {
             if(players.isEmpty()) return;
-            PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(manager.getEntityID(textDisplay)); //textDisplay.al() = getId()
-            manager.sendPacket(players, destroy);
-
+            PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(manager.getEntityID(textDisplay));
             manager.sendPacket(players, destroy);
             manager.removePassengers(target, textDisplay);
         }
 
         @Override
         public void setText(String text) {
-            textDisplay.c(CraftChatMessage.fromString(text, true)[0]);
+            textDisplay.a(CraftChatMessage.fromString(text, true)[0]);
+        }
+
+        @Override
+        public void setText(List<BaseComponent> components) {
+            List<IChatBaseComponent> iChatBaseComponents = new ArrayList<>();
+
+            for(BaseComponent baseComponent : components){
+                String json = ComponentSerializer.toJson(baseComponent).toString();
+                iChatBaseComponents.add(CraftChatMessage.fromJSONOrString(json, true));
+            }
+
+            IChatBaseComponent empty = IChatBaseComponent.i();
+
+            IChatBaseComponent mutableComponent = ChatComponentUtils.a(iChatBaseComponents, empty);
+
+            textDisplay.a(mutableComponent);
         }
 
         @Override
         public void setColor(HoloColor color) {
             int colorValue = color == null ? -1 : color.asARGB();
-            manager.getDataWatcher(textDisplay).b(Display.TextDisplay.aO, colorValue); //CraftTextDisplay.setBackgroundColor
+            manager.getDataWatcher(textDisplay).a(Display.TextDisplay.aI, colorValue);
         }
 
         @Override
@@ -272,7 +357,7 @@ public class v1_20_R3 implements Compat{
 
         @Override
         public void setScale(float x, float y, float z) {
-            Transformation nms = Display.a(manager.getDataWatcher(textDisplay)); // ar = getDataWatcher
+            Transformation nms = Display.a(manager.getDataWatcher(textDisplay));
             Transformation transformation = new Transformation(nms.d(), nms.e(), new Vector3f(x, y, z), nms.g());
             textDisplay.a(transformation);
         }
@@ -305,7 +390,7 @@ public class v1_20_R3 implements Compat{
 
         @Override
         public void setLineWidth(int width) {
-            manager.getDataWatcher(textDisplay).b(Display.TextDisplay.aN, width);
+            manager.getDataWatcher(textDisplay).a(Display.TextDisplay.aH, width);
         }
 
         @Override
@@ -370,37 +455,9 @@ public class v1_20_R3 implements Compat{
         }
 
         @Override
-        public void setText(List<BaseComponent> components) {
-            List<IChatBaseComponent> iChatBaseComponents = new ArrayList<>();
-
-            boolean isJson = true;
-
-            try{
-                ComponentSerializer.class.getDeclaredMethod("toJson", BaseComponent.class);
-            }catch (Exception ignored){
-                isJson = false;
-            }
-
-            for(BaseComponent baseComponent : components){
-                if(isJson){
-                    String json = ComponentSerializer.toJson(baseComponent).toString();
-                    iChatBaseComponents.add(CraftChatMessage.fromJSONOrString(json, true));
-                }else {
-                    iChatBaseComponents.add(CraftChatMessage.fromJSONOrString(ComponentSerializer.toString(baseComponent), true));
-                }
-            }
-
-            IChatBaseComponent empty = IChatBaseComponent.i();
-
-            IChatBaseComponent mutableComponent = ChatComponentUtils.a(iChatBaseComponents, empty);
-
-            textDisplay.c(mutableComponent);
-        }
-
-        @Override
         public void mount(org.bukkit.entity.Entity target) {
-            this.target =  target;
-           manager.mount(players, target, textDisplay);
+            this.target = target;
+            manager.mount(players, target, textDisplay);
         }
 
         @Override
@@ -414,41 +471,47 @@ public class v1_20_R3 implements Compat{
         }
 
         public void setFlag(int flag, boolean set){
-            byte flagBits = textDisplay.z();
+            byte flagBits = this.textDisplay.x();
             if (set) {
                 flagBits = (byte)(flagBits | flag);
             } else {
-                flagBits = (byte)(flagBits & (~flag));
+                flagBits = (byte)(flagBits & ~flag);
             }
+
             textDisplay.d(flagBits);
         }
     }
 
     public static class HoloDisplayItem implements HoloItemDisplay{
-        private List<Player> players = new ArrayList<>();
+
+        private final List<Player> players;
         private final Display.ItemDisplay itemDisplay;
         private Location location;
         private final Packet<?> spawnPacket;
-        private final v1_20_R3 manager;
         private org.bukkit.entity.Entity target;
+        private final v1_21_R2 manager;
 
-        public HoloDisplayItem(List<Player> players, Location location, float yaw, float pitch, Compat manager){
-            this.manager = (v1_20_R3) manager;
+        public HoloDisplayItem(List<Player> players, Location location, float yaw, float pitch, v1_21_R2 manager){
+            this.manager = manager;
             this.players = players;
             this.location = location;
             WorldServer world = ((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle();
-            this.itemDisplay = new Display.ItemDisplay(EntityTypes.af, world);
-            spawnPacket = new PacketPlayOutSpawnEntity(((v1_20_R3) manager).getEntityID(itemDisplay), itemDisplay.cw(), location.getX(), location.getY(), location.getZ(), pitch, yaw, itemDisplay.ai(), 0, itemDisplay.dp(), itemDisplay.cp());
+            this.itemDisplay = new Display.ItemDisplay(EntityTypes.as, world);
+            spawnPacket =  new PacketPlayOutSpawnEntity (manager.getEntityID(itemDisplay), itemDisplay.cG(), location.getX(), location.getY(), location.getZ(), pitch, yaw, itemDisplay.aq(), 0, itemDisplay.dz(), itemDisplay.cA());
 
-            ((v1_20_R3) manager).sendPacket(players, spawnPacket);
+            manager.sendPacket(players, spawnPacket);
+        }
+
+        public Entity getEntity(){
+            return itemDisplay;
         }
 
         @Override
         public void update(Location location) {
             if(players.isEmpty()) return;
             this.location = location;
-            PacketPlayOutEntityTeleport teleport = new PacketPlayOutEntityTeleport(itemDisplay);
-            manager.sendPacket(players, teleport);
+//            PacketPlayOutEntityTeleport teleport = new PacketPlayOutEntityTeleport(itemDisplay);
+//            manager.sendPacket(players, teleport);
 
             internalUpdate();
         }
@@ -508,8 +571,8 @@ public class v1_20_R3 implements Compat{
 
         @Override
         public void mount(org.bukkit.entity.Entity target) {
-            this.target =  target;
-           manager.mount(players, target, itemDisplay);
+            this.target = target;
+            manager.mount(players, target, itemDisplay);
         }
 
         @Override

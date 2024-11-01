@@ -8,6 +8,7 @@ import net.kokoricraft.holotools.version.HoloItemDisplay;
 import net.kokoricraft.holotools.version.HoloTextDisplay;
 import net.kokoricraft.holotools.version.v1_21_R1;
 import net.md_5.bungee.api.chat.BaseComponent;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -20,6 +21,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.util.StringUtil;
+import org.bukkit.util.Transformation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -110,24 +113,51 @@ public class Commands implements CommandExecutor {
         }, 20 * 15);
     }
 
+    public void test3(CommandSender sender, String[] args){
+        if(!(sender instanceof Player player)) return;
+        Location location = player.getLocation();
+
+        List<HoloTextDisplay> displays = new ArrayList<>();
+
+        float scale = 0.5f;
+
+        for(int i = 0; i < 30; i++){
+            HoloTextDisplay main = plugin.getCompatManager().createTextDisplay(List.of(player), location, 0, 0);
+            String separators = StringUtils.repeat("....", i);
+            main.setBillboard(Display.Billboard.VERTICAL);
+            main.setText("A\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA\nA".replaceAll("A", separators));
+            main.setColor(HoloColor.fromARGB(26, 255, 0, 0));
+            main.setTextOpacity((byte) 20);
+            main.setBrightness(new Display.Brightness(15, 15));
+            main.setScale(0.03f, 1 * scale, .3f);
+            main.setTranslation(0, 0.003f * i, 0.0001f * i);
+            main.setLineWidth(99999999);
+            main.update();
+            displays.add(main);
+        }
+
+
+        Bukkit.getScheduler().runTaskLater(plugin, () ->{
+            displays.forEach(HoloTextDisplay::remove);
+        }, 20 * 8);
+    }
+
     public void test2(CommandSender sender, String[] args){
         if(!(sender instanceof Player player)) return;
         Location location = player.getLocation();
 
+        ItemDisplay display = location.getWorld().spawn(location, ItemDisplay.class);
 
-        List<HoloTextDisplay> displays = new ArrayList<>();
-
-        HoloTextDisplay main = plugin.getCompatManager().createTextDisplay(List.of(player), location, 0, 0);
-
-        main.setBillboard(Display.Billboard.HORIZONTAL);
-        main.setText(".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n");
-        main.setColor(HoloColor.fromARGB(200, 255, 0, 0));
-        main.setTextOpacity((byte) 20);
-        main.update();
+        display.setItemStack(new ItemStack(Material.ENCHANTED_GOLDEN_APPLE));
+        display.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.GROUND);
+        Transformation transformation = display.getTransformation();
 
         Bukkit.getScheduler().runTaskLater(plugin, () ->{
-            displays.forEach(HoloTextDisplay::remove);
-        }, 20 * 20);
+            display.setInterpolationDelay(1);
+            display.setInterpolationDuration(20 * 10);
+            transformation.getLeftRotation().rotateXYZ((float) Math.toRadians(0), (float) Math.toRadians(90), (float) Math.toRadians(0));
+            display.setTransformation(transformation);
+        }, 10);
     }
 
     public String getText(int i){

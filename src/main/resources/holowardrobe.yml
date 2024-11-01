@@ -21,8 +21,14 @@ colors:
       slot_4: blue
       slot_6: blue
 
-
 colors_lists:
+  red:
+    unselected:
+      hex: "#24dce5"
+      alpha: 150
+      selected:
+        hex: "#5be4ec"
+        alpha: 200
   blue:
     unselected:
       hex: "#19a7d2"

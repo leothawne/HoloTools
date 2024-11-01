@@ -3,10 +3,12 @@ package net.kokoricraft.holotools;
 import net.kokoricraft.holotools.commands.Commands;
 import net.kokoricraft.holotools.commands.CommandsCompleter;
 import net.kokoricraft.holotools.data.PlayerManager;
+import net.kokoricraft.holotools.enums.GlowColor;
 import net.kokoricraft.holotools.interfaces.Tickable;
 import net.kokoricraft.holotools.listeners.HoloCrafterListener;
 import net.kokoricraft.holotools.listeners.HoloListener;
 import net.kokoricraft.holotools.listeners.PlayerListener;
+import net.kokoricraft.holotools.listeners.TestListeners;
 import net.kokoricraft.holotools.managers.*;
 import net.kokoricraft.holotools.objects.halo.Holo;
 import net.kokoricraft.holotools.utils.CraftItemsUtils;
@@ -62,6 +64,8 @@ public final class HoloTools extends JavaPlugin {
                 holo.setVisible(false);
             }
         }
+
+        GlowColor.unregisterAll();
     }
 
     private void initCommands(){
@@ -91,6 +95,7 @@ public final class HoloTools extends JavaPlugin {
         pm.registerEvents(new HoloListener(this), this);
         pm.registerEvents(new HoloCrafterListener(this), this);
         pm.registerEvents(new PlayerListener(this), this);
+//        pm.registerEvents(new TestListeners(this), this);
     }
 
     private void checkPlayers(){

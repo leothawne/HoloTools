@@ -2,10 +2,7 @@ package net.kokoricraft.holotools.version;
 
 import org.bukkit.Color;
 import org.bukkit.Location;
-import org.bukkit.entity.Display;
-import org.bukkit.entity.ItemDisplay;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.TextDisplay;
+import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 
 public interface HoloItemDisplay {
@@ -17,7 +14,7 @@ public interface HoloItemDisplay {
     void setTranslation(float x, float y, float z);
     void setRotation(float v, float v2);
     void update();
-    void mount(Player player);
+    void mount(Entity target);
     void setItemStack(ItemStack itemStack);
     Location getLocation();
     void setItemDisplayTransform(ItemDisplay.ItemDisplayTransform transform);

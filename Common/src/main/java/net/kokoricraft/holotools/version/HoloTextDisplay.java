@@ -4,7 +4,7 @@ import net.kokoricraft.holotools.utils.objects.HoloColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Location;
 import org.bukkit.entity.Display;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.TextDisplay;
 
 import java.util.List;
@@ -26,7 +26,7 @@ public interface HoloTextDisplay {
     void setTranslation(float x, float y, float z);
     void update();
     void setBillboard(Display.Billboard billboard);
-    void mount(Player player);
+    void mount(Entity target);
     Location getLocation();
     void setBrightness(Display.Brightness brightness);
     void setViewRange(float range);

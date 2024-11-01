@@ -6,6 +6,7 @@ group = 'net.kokoricraft.holotools.version'
 version = '1.0.0'
 
 repositories {
+    mavenLocal();
     maven {
         name = "spigotmc-repo"
         url = "https://repo.codemc.org/repository/nms/"

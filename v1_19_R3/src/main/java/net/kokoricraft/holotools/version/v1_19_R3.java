@@ -172,14 +172,14 @@ public class v1_19_R3 implements Compat{
         });
     }
 
-    public void removePassengers(Player target, Entity passenger){
+    public void removePassengers(org.bukkit.entity.Entity target, Entity passenger){
         if(target == null) return;
         List<Entity> entities = new ArrayList<>(passengers.getOrDefault(target.getEntityId(), new ArrayList<>()));
         entities.remove(passenger);
         passengers.put(target.getEntityId(), entities);
     }
 
-    public void mount(List<Player> players, Player target, Entity passenger){
+    public void mount(List<Player> players, org.bukkit.entity.Entity target, Entity passenger){
         List<Entity> entities = passengers.getOrDefault(target.getEntityId(), new ArrayList<>());
         if(!entities.contains(passenger))
             entities.add(passenger);
@@ -195,7 +195,7 @@ public class v1_19_R3 implements Compat{
         private final Display.TextDisplay textDisplay;
         private Location location;
         private final Packet<?> spawnPacket;
-        private Player target;
+        private org.bukkit.entity.Entity target;
         private final v1_19_R3 manager;
 
         public HoloDisplayText(List<Player> players, Location location, float yaw, float pitch, v1_19_R3 manager){
@@ -360,7 +360,7 @@ public class v1_19_R3 implements Compat{
         }
 
         @Override
-        public void mount(Player target) {
+        public void mount(org.bukkit.entity.Entity target) {
             this.target = target;
             manager.mount(players, target, textDisplay);
         }
@@ -392,7 +392,7 @@ public class v1_19_R3 implements Compat{
         private final Display.ItemDisplay itemDisplay;
         private Location location;
         private final Packet<?> spawnPacket;
-        private Player target;
+        private org.bukkit.entity.Entity target;
         private final v1_19_R3 manager;
 
         public HoloDisplayItem(List<Player> players, Location location, float yaw, float pitch, v1_19_R3 manager){
@@ -473,7 +473,7 @@ public class v1_19_R3 implements Compat{
         }
 
         @Override
-        public void mount(Player target) {
+        public void mount(org.bukkit.entity.Entity target) {
             this.target = target;
             manager.mount(players, target, itemDisplay);
         }

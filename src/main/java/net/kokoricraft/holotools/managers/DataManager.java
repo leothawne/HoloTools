@@ -195,6 +195,9 @@ public class DataManager {
 
         if(plugin.getConfigManager().STORAGE_MODE == StorageMode.ITEM){
             meta.getPersistentDataContainer().set(WARDROBE_KEY, PersistentDataType.STRING, jsonObject.toString());
+
+            if(plugin.getHoloManager().isHolo(player.getInventory().getItemInMainHand()))
+                player.getInventory().setItemInMainHand(itemStack);
         }
 
         if(plugin.getConfigManager().STORAGE_MODE == StorageMode.PLAYER){
@@ -208,9 +211,6 @@ public class DataManager {
         }
 
         itemStack.setItemMeta(meta);
-
-        if(!plugin.getHoloManager().isHolo(player.getInventory().getItemInMainHand())) return;
-        player.getInventory().setItemInMainHand(itemStack);
     }
 
     public HoloWardrobe loadHoloWardrobe(Player player, ItemStack itemStack){

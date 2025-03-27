@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'net.kokoricraft'
-version = '1.1.7'
+version = '1.2.0'
 
 repositories {
 	mavenCentral()
@@ -27,6 +27,7 @@ dependencies {
     compileOnly(project(path: ":v1_21_R1"))
     compileOnly(project(path: ":v1_21_R2"))
     compileOnly(project(path: ":v1_21_R3"))
+    compileOnly(project(path: ":v1_21_R4"))
     implementation project(path: ':Common')
 }
 

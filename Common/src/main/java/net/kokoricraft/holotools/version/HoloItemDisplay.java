@@ -1,8 +1,9 @@
 package net.kokoricraft.holotools.version;
 
-import org.bukkit.Color;
 import org.bukkit.Location;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Display;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.ItemDisplay;
 import org.bukkit.inventory.ItemStack;
 
 public interface HoloItemDisplay {

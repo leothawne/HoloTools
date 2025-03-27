@@ -6,32 +6,27 @@ group = 'net.kokoricraft'
 version = '1.1.7'
 
 repositories {
-    mavenCentral()
-    maven {
-        name = "sonatype"
-        url = "https://oss.sonatype.org/content/groups/public/"
-    }
+	mavenCentral()
+
+	mavenLocal()
 
     maven {
         name = "spigotmc-repo"
-        url = "https://repo.codemc.org/repository/nms/"
-    }
-
-    maven { url 'https://maven.evokegames.gg/snapshots' }
-    maven {
-        name = "minecraft-repo"
-        url = "https://repo.minebench.de/"
+        url = "https://hub.spigotmc.org/nexus/repository/public/"
     }
 }
 
 dependencies {
     compileOnly "org.spigotmc:spigot:1.21.1-R0.1-SNAPSHOT"
+    compileOnly "org.spigotmc:spigot-api:1.21.1-R0.1-SNAPSHOT"
     compileOnly(project(path: ":v1_19_R3"))
     compileOnly(project(path: ":v1_20_R1"))
     compileOnly(project(path: ":v1_20_R2"))
     compileOnly(project(path: ":v1_20_R3"))
     compileOnly(project(path: ":v1_20_R4"))
     compileOnly(project(path: ":v1_21_R1"))
+    compileOnly(project(path: ":v1_21_R2"))
+    compileOnly(project(path: ":v1_21_R3"))
     implementation project(path: ':Common')
 }
 
@@ -57,7 +52,7 @@ tasks.withType(JavaCompile).configureEach {
 processResources {
     def props = [version: version]
     inputs.properties props
-    filteringCharset 'UTF-8'
+    filteringCharset = 'UTF-8'
     filesMatching('plugin.yml') {
         expand props
     }
@@ -65,11 +60,6 @@ processResources {
 
 jar {
     archiveFileName = "HoloTools.jar"
-    if (System.getProperty("user.name") == "nya") {
-        destinationDirectory = file("${System.getProperty('user.home')}/Desktop")
-    } else {
-        destinationDirectory = file("D:/servers/1.21.3/plugins")
-    }
     from {
         subprojects.collect { it.sourceSets.main.output }
     }

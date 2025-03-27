@@ -1,18 +1,45 @@
 package net.kokoricraft.holotools.version;
 
-import com.google.common.collect.ImmutableList;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_20_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R2.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_20_R2.util.CraftChatMessage;
+import org.bukkit.entity.ItemDisplay;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.TextDisplay;
+import org.bukkit.inventory.ItemStack;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
 import com.mojang.math.Transformation;
-import io.netty.channel.*;
+
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.ChannelPromise;
 import net.kokoricraft.holotools.events.InventoryUpdateEvent;
 import net.kokoricraft.holotools.utils.objects.HoloColor;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.chat.ComponentSerializer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.chat.ChatComponentUtils;
 import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.*;
+import net.minecraft.network.protocol.game.PacketPlayOutEntityDestroy;
+import net.minecraft.network.protocol.game.PacketPlayOutEntityMetadata;
+import net.minecraft.network.protocol.game.PacketPlayOutEntityTeleport;
+import net.minecraft.network.protocol.game.PacketPlayOutMount;
+import net.minecraft.network.protocol.game.PacketPlayOutSpawnEntity;
 import net.minecraft.network.syncher.DataWatcher;
 import net.minecraft.server.level.WorldServer;
 import net.minecraft.server.network.ServerCommonPacketListenerImpl;
@@ -23,22 +50,6 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.TooltipFlag;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_20_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftTextDisplay;
-import org.bukkit.craftbukkit.v1_20_R2.inventory.CraftItemStack;
-import org.bukkit.craftbukkit.v1_20_R2.util.CraftChatMessage;
-import org.bukkit.entity.ItemDisplay;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.TextDisplay;
-import org.bukkit.inventory.ItemStack;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
-
-import java.lang.reflect.Field;
-import java.util.*;
 
 public class v1_20_R2 implements Compat{
     private final Map<Integer, List<Entity>> passengers = new HashMap<>();

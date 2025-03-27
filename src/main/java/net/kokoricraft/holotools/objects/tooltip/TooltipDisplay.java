@@ -1,28 +1,30 @@
 package net.kokoricraft.holotools.objects.tooltip;
 
-import com.google.common.base.Strings;
-import net.kokoricraft.holotools.HoloTools;
-import net.kokoricraft.holotools.utils.objects.HoloColor;
-import net.kokoricraft.holotools.version.HoloTextDisplay;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.Display;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.entity.TextDisplay.TextAlignment;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Display;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.TextDisplay.TextAlignment;
+import org.bukkit.inventory.ItemStack;
+
+import com.google.common.base.Strings;
+
+import net.kokoricraft.holotools.HoloTools;
+import net.kokoricraft.holotools.utils.objects.HoloColor;
+import net.kokoricraft.holotools.version.HoloTextDisplay;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
+
 public class TooltipDisplay {
     private final static float size = 0.2f;
     private final static HoloColor background_color = HoloColor.fromARGB(255, 16, 0, 16);
     private final static HoloColor outline_color = HoloColor.fromHex("#270066", 255);
-    private final static HoloColor white = HoloColor.fromARGB(255, 255, 255, 255);
+    //private final static HoloColor white = HoloColor.fromARGB(255, 255, 255, 255);
     private final HoloTools plugin = HoloTools.getInstance();
     private final Map<TooltipLayerType, HoloTextDisplay> entities = new HashMap<>();
     private final Display.Billboard billboard = Display.Billboard.VERTICAL;

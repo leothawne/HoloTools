@@ -1,19 +1,17 @@
 package net.kokoricraft.holotools.objects.halo;
 
-import net.kokoricraft.holotools.HoloTools;
-import net.kokoricraft.holotools.enums.HoloSize;
-import net.kokoricraft.holotools.interfaces.HoloBase;
-import net.kokoricraft.holotools.interfaces.Tickable;
-import org.bukkit.Bukkit;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.HashMap;
-import java.util.Map;
+import net.kokoricraft.holotools.enums.HoloSize;
+import net.kokoricraft.holotools.interfaces.HoloBase;
+import net.kokoricraft.holotools.interfaces.Tickable;
 
 public abstract class Holo implements Tickable, HoloBase{
-    private final HoloTools plugin = HoloTools.getInstance();
     protected Player player;
     protected final int size;
     protected final float height;

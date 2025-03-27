@@ -1,20 +1,19 @@
 package net.kokoricraft.holotools.objects.holowardrobe;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
 import net.kokoricraft.holotools.HoloTools;
 import net.kokoricraft.holotools.enums.HoloActionType;
-import net.kokoricraft.holotools.enums.HoloColors;
 import net.kokoricraft.holotools.enums.HoloType;
 import net.kokoricraft.holotools.interfaces.HoloBase;
 import net.kokoricraft.holotools.objects.colors.HoloPanelsColors;
 import net.kokoricraft.holotools.objects.halo.HaloSlot;
 import net.kokoricraft.holotools.objects.halo.Holo;
 import net.kokoricraft.holotools.objects.tooltip.TooltipDisplay;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class HoloWardrobe extends Holo implements HoloBase {
     private final HoloTools plugin = HoloTools.getInstance();

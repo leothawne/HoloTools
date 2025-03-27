@@ -1,20 +1,16 @@
 package net.kokoricraft.holotools.objects.colors;
 
-import net.kokoricraft.holotools.HoloTools;
-import net.kokoricraft.holotools.managers.ConfigManager;
-import org.bukkit.Bukkit;
+import java.util.Map;
+
 import org.bukkit.entity.Player;
 
-import java.io.ObjectInputFilter;
-import java.util.HashMap;
-import java.util.Map;
+import net.kokoricraft.holotools.managers.ConfigManager;
 
 public class HoloPanelsColors {
     private final String name;
     private final Map<String, DualColor> colors;
     private final boolean need_permission;
     private final String permission;
-    private final HoloTools plugin = HoloTools.getInstance();
 
     public HoloPanelsColors(String name, Map<String, DualColor> colors, boolean need_permission, String permission){
         this.name = name;

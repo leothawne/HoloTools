@@ -1,14 +1,16 @@
 package net.kokoricraft.holotools.utils;
 
-import net.kokoricraft.holotools.HoloTools;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Scanner;
+import java.util.function.Consumer;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Scanner;
-import java.util.function.Consumer;
+import net.kokoricraft.holotools.HoloTools;
 
 // From: https://www.spigotmc.org/wiki/creating-an-update-checker-that-checks-for-updates
 public class UpdateChecker {
@@ -23,11 +25,11 @@ public class UpdateChecker {
 
     public void getVersion(final Consumer<String> consumer) {
         Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> {
-            try (InputStream is = new URL("https://api.spigotmc.org/legacy/update.php?resource=" + this.resourceId + "/~").openStream(); Scanner scann = new Scanner(is)) {
+            try (InputStream is = new URI("https://api.spigotmc.org/legacy/update.php?resource=" + this.resourceId + "/~").toURL().openStream(); Scanner scann = new Scanner(is)) {
                 if (scann.hasNext()) {
                     consumer.accept(scann.next());
                 }
-            } catch (IOException e) {
+            } catch (IOException | URISyntaxException e) {
                 plugin.getLogger().info("Unable to check for updates: " + e.getMessage());
             }
         });

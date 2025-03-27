@@ -1,24 +1,25 @@
 package net.kokoricraft.holotools.managers;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.bukkit.configuration.ConfigurationSection;
+
 import com.google.gson.JsonObject;
+
 import net.kokoricraft.holotools.HoloTools;
 import net.kokoricraft.holotools.data.StorageConfig;
 import net.kokoricraft.holotools.enums.HoloColors;
 import net.kokoricraft.holotools.enums.HoloType;
 import net.kokoricraft.holotools.enums.StorageMode;
 import net.kokoricraft.holotools.enums.StorageType;
-import net.kokoricraft.holotools.objects.colors.DualColor;
 import net.kokoricraft.holotools.objects.NekoConfig;
 import net.kokoricraft.holotools.objects.NekoItem;
+import net.kokoricraft.holotools.objects.colors.DualColor;
 import net.kokoricraft.holotools.objects.colors.HoloPanelsColors;
 import net.kokoricraft.holotools.utils.objects.HoloColor;
-import org.bukkit.Bukkit;
-import org.bukkit.configuration.ConfigurationSection;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class ConfigManager {
     private final HoloTools plugin;

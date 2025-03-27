@@ -1,13 +1,8 @@
 package net.kokoricraft.holotools.commands;
 
-import joptsimple.internal.Strings;
-import net.kokoricraft.holotools.HoloTools;
-import net.kokoricraft.holotools.objects.tooltip.TooltipDisplay;
-import net.kokoricraft.holotools.utils.objects.HoloColor;
-import net.kokoricraft.holotools.version.HoloItemDisplay;
-import net.kokoricraft.holotools.version.HoloTextDisplay;
-import net.kokoricraft.holotools.version.v1_21_R1;
-import net.md_5.bungee.api.chat.BaseComponent;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -21,11 +16,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.util.StringUtil;
 import org.bukkit.util.Transformation;
 
-import java.util.ArrayList;
-import java.util.List;
+import joptsimple.internal.Strings;
+import net.kokoricraft.holotools.HoloTools;
+import net.kokoricraft.holotools.utils.objects.HoloColor;
+import net.kokoricraft.holotools.version.HoloItemDisplay;
+import net.kokoricraft.holotools.version.HoloTextDisplay;
 
 public class Commands implements CommandExecutor {
     private final HoloTools plugin;
@@ -35,9 +32,9 @@ public class Commands implements CommandExecutor {
     }
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args){
-        Player player = (Player) sender;
+        //Player player = (Player) sender;
         if(args.length == 0){
-            player.sendMessage(plugin.getUtils().color(String.format("&cUse %s give / reload", label)));
+            sender.sendMessage(plugin.getUtils().color(String.format("&cUse %s give / reload", label)));
             return true;
         }
 
@@ -53,6 +50,10 @@ public class Commands implements CommandExecutor {
     }
 
     private void testCommand(CommandSender sender, String[] args) {
+    	if(!(sender instanceof Player)) {
+    		sender.sendMessage(plugin.getUtils().color("&cYou must be a player to do that"));
+    		return;
+    	}
         Player player = (Player)sender;
 
         Location location = player.getLocation().clone();

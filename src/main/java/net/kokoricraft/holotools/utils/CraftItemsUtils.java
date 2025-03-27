@@ -1,22 +1,19 @@
 package net.kokoricraft.holotools.utils;
 
-import net.kokoricraft.holotools.HoloTools;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.ShapelessRecipe;
+
 public class CraftItemsUtils {
-
-    private final HoloTools plugin;
-
-    public CraftItemsUtils(HoloTools plugin){
-        this.plugin = plugin;
-    }
 
     public void craftItems(Player player, Recipe recipe, int amount){
         List<ItemStack> ingredients = new ArrayList<>();
@@ -89,7 +86,7 @@ public class CraftItemsUtils {
     }
 
 
-    private int getFreeSpace(Player player, ItemStack result){
+    /*private int getFreeSpace(Player player, ItemStack result){
         int free_space = 0;
         for(int i = 0; i < 36; i++){
             ItemStack slot = player.getInventory().getItem(i);
@@ -104,7 +101,7 @@ public class CraftItemsUtils {
         }
 
         return free_space;
-    }
+    }*/
 
     private List<ItemStack> getShapedIngredients(ShapedRecipe recipe){
         Map<ItemStack, Integer> ingredientCountMap = new HashMap<>();

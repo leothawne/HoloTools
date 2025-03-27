@@ -1,22 +1,20 @@
 package net.kokoricraft.holotools.objects.holocrafter;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
+
 import net.kokoricraft.holotools.HoloTools;
 import net.kokoricraft.holotools.enums.HoloActionType;
-import net.kokoricraft.holotools.enums.HoloColors;
 import net.kokoricraft.holotools.enums.HoloType;
 import net.kokoricraft.holotools.interfaces.HoloBase;
 import net.kokoricraft.holotools.objects.colors.DualColor;
 import net.kokoricraft.holotools.objects.colors.HoloPanelsColors;
 import net.kokoricraft.holotools.objects.halo.HaloSlot;
 import net.kokoricraft.holotools.objects.halo.Holo;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.InventoryView;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class HoloCrafter extends Holo implements HoloBase {
     private final HoloTools plugin = HoloTools.getInstance();
@@ -85,7 +83,7 @@ public class HoloCrafter extends Holo implements HoloBase {
         super.onClick();
         int slot = getSlot();
         if(slot == 0){
-            InventoryView view = player.openWorkbench(null, true);
+            /*InventoryView view = */player.openWorkbench(null, true);
             return;
         }
 

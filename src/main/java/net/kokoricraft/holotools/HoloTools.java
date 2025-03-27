@@ -1,5 +1,10 @@
 package net.kokoricraft.holotools;
 
+import org.bukkit.Bukkit;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.java.JavaPlugin;
+
 import net.kokoricraft.holotools.commands.Commands;
 import net.kokoricraft.holotools.commands.CommandsCompleter;
 import net.kokoricraft.holotools.data.PlayerManager;
@@ -8,17 +13,18 @@ import net.kokoricraft.holotools.interfaces.Tickable;
 import net.kokoricraft.holotools.listeners.HoloCrafterListener;
 import net.kokoricraft.holotools.listeners.HoloListener;
 import net.kokoricraft.holotools.listeners.PlayerListener;
-import net.kokoricraft.holotools.listeners.TestListeners;
-import net.kokoricraft.holotools.managers.*;
+import net.kokoricraft.holotools.managers.CompatManager;
+import net.kokoricraft.holotools.managers.ConfigManager;
+import net.kokoricraft.holotools.managers.DataManager;
+import net.kokoricraft.holotools.managers.HoloManager;
+import net.kokoricraft.holotools.managers.LangManager;
+import net.kokoricraft.holotools.managers.Manager;
+import net.kokoricraft.holotools.managers.TickManager;
 import net.kokoricraft.holotools.objects.halo.Holo;
 import net.kokoricraft.holotools.utils.CraftItemsUtils;
 import net.kokoricraft.holotools.utils.Metrics;
 import net.kokoricraft.holotools.utils.UpdateChecker;
 import net.kokoricraft.holotools.utils.Utils;
-import org.bukkit.Bukkit;
-import org.bukkit.command.PluginCommand;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.java.JavaPlugin;
 
 public final class HoloTools extends JavaPlugin {
     private TickManager tickManager;
@@ -79,8 +85,8 @@ public final class HoloTools extends JavaPlugin {
         tickManager = new TickManager(this);
         manager = new Manager(this);
         compatManager = new CompatManager(this);
-        utils = new Utils(this);
-        craftItemsUtils = new CraftItemsUtils(this);
+        utils = new Utils();
+        craftItemsUtils = new CraftItemsUtils();
         holoManager = new HoloManager(this);
         configManager = new ConfigManager(this);
         dataManager = new DataManager(this);

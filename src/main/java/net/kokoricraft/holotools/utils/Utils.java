@@ -1,9 +1,19 @@
 package net.kokoricraft.holotools.utils;
 
-import net.kokoricraft.holotools.HoloTools;
-import net.kokoricraft.holotools.commands.Commands;
-import net.kokoricraft.holotools.enums.DefaultFontInfo;
-import net.md_5.bungee.api.chat.TextComponent;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -17,26 +27,12 @@ import org.bukkit.profile.PlayerTextures;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
+import net.kokoricraft.holotools.enums.DefaultFontInfo;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class Utils {
-    private final HoloTools plugin;
     private final Pattern hex_pattern = Pattern.compile("(&#|#)([A-Fa-f0-9]{6})");
     private List<CommandSender> debuggers = new ArrayList<>();
-    public Utils(HoloTools plugin){
-        this.plugin = plugin;
-    }
 
     public int getTextLength(String text) {
         int messagePxSize = 0;
@@ -98,7 +94,7 @@ public class Utils {
         SkullMeta meta = (SkullMeta) head.getItemMeta();
         PlayerTextures textures = profile.getTextures();
         try{
-            URL url = new URL(texture);
+            URL url = new URI(texture).toURL();
             textures.setSkin(url);
             profile.setTextures(textures);
         }catch(Exception ignored) {

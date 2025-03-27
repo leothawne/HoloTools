@@ -1,18 +1,18 @@
 package net.kokoricraft.holotools.objects.halo;
 
-import com.google.common.collect.Lists;
-import net.kokoricraft.holotools.HoloTools;
-import net.kokoricraft.holotools.utils.objects.HoloColor;
-import net.kokoricraft.holotools.version.HoloItemDisplay;
-import net.kokoricraft.holotools.version.HoloTextDisplay;
-import org.bukkit.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import net.kokoricraft.holotools.HoloTools;
+import net.kokoricraft.holotools.utils.objects.HoloColor;
+import net.kokoricraft.holotools.version.HoloItemDisplay;
+import net.kokoricraft.holotools.version.HoloTextDisplay;
 
 public class HaloSlot {
     private final int slot;

@@ -21,7 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
-import java.net.URL;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
@@ -40,7 +40,9 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
+
 import javax.net.ssl.HttpsURLConnection;
+
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -59,7 +61,8 @@ public class Metrics {
      * @param serviceId The id of the service. It can be found at <a
      *     href="https://bstats.org/what-is-my-plugin-id">What is my plugin id?</a>
      */
-    public Metrics(Plugin plugin, int serviceId) {
+    @SuppressWarnings("deprecation")
+	public Metrics(Plugin plugin, int serviceId) {
         this.plugin = plugin;
         // Get the config file
         File bStatsFolder = new File(plugin.getDataFolder().getParentFile(), "bStats");
@@ -338,7 +341,7 @@ public class Metrics {
                 infoLogger.accept("Sent bStats metrics data: " + data.toString());
             }
             String url = String.format(REPORT_URL, platform);
-            HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
+            HttpsURLConnection connection = (HttpsURLConnection) new URI(url).toURL().openConnection();
             // Compress the data to save bandwidth
             byte[] compressedData = compress(data.toString());
             connection.setRequestMethod("POST");

@@ -1,11 +1,7 @@
 package net.kokoricraft.holotools.objects.holocrafter;
 
-import net.kokoricraft.holotools.HoloTools;
-import net.kokoricraft.holotools.objects.halo.HaloSlot;
-import net.kokoricraft.holotools.utils.objects.HoloColor;
-import net.kokoricraft.holotools.version.HoloItemDisplay;
-import net.kokoricraft.holotools.version.HoloTextDisplay;
-import org.bukkit.Color;
+import java.util.List;
+
 import org.bukkit.Material;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.ItemDisplay;
@@ -14,7 +10,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.List;
+import net.kokoricraft.holotools.HoloTools;
+import net.kokoricraft.holotools.objects.halo.HaloSlot;
+import net.kokoricraft.holotools.utils.objects.HoloColor;
+import net.kokoricraft.holotools.version.HoloItemDisplay;
+import net.kokoricraft.holotools.version.HoloTextDisplay;
 
 public class HoloCrafterSlot {
     private final HoloTools plugin = HoloTools.getInstance();

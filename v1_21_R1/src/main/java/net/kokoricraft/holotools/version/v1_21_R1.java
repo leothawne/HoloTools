@@ -42,7 +42,6 @@ import net.minecraft.network.chat.IChatBaseComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.GameTestAddMarkerDebugPayload;
-import net.minecraft.network.protocol.game.PacketPlayInFlying;
 import net.minecraft.network.protocol.game.PacketPlayOutEntityDestroy;
 import net.minecraft.network.protocol.game.PacketPlayOutEntityMetadata;
 import net.minecraft.network.protocol.game.PacketPlayOutEntityTeleport;
@@ -98,7 +97,7 @@ public class v1_21_R1 implements Compat{
 
                 @Override
                 public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-                    if(msg instanceof Packet<?> packet){
+                    /*if(msg instanceof Packet<?> packet){
                         String name = packet.getClass().getName();
 
                         if(name.endsWith("PacketPlayInLook")) {
@@ -115,7 +114,7 @@ public class v1_21_R1 implements Compat{
 //                        }
 
 
-                    }
+                    }*/
 
                     super.channelRead(ctx, msg);
                 }

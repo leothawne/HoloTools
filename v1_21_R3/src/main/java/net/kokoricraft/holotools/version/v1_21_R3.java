@@ -505,7 +505,7 @@ public class v1_21_R3 implements Compat{
             this.players = players;
             this.location = location;
             WorldServer world = ((CraftWorld) Objects.requireNonNull(location.getWorld())).getHandle();
-            this.itemDisplay = new Display.ItemDisplay(EntityTypes.as, world);
+            this.itemDisplay = new Display.ItemDisplay(EntityTypes.ar, world);
             spawnPacket =  new PacketPlayOutSpawnEntity(manager.getEntityID(itemDisplay), itemDisplay.cG(), location.getX(), location.getY(), location.getZ(), pitch, yaw, itemDisplay.aq(), 0, itemDisplay.dy(), itemDisplay.cA());
 
             manager.sendPacket(players, spawnPacket);

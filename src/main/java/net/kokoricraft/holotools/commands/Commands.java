@@ -197,11 +197,40 @@ public class Commands implements CommandExecutor {
         }
 
         String itemName = args[1].toLowerCase();
-        Player target = args.length == 3 ? plugin.getServer().getPlayer(args[2]) : (Player) sender;
-        int amount = args.length == 4 ? Integer.parseInt(args[3]) : args.length == 3 && target != sender ? 1 : args.length == 2 ? 1 : Integer.parseInt(args[2]);
-
+        Player target = null;
+        int amount = 0;
+        if(args.length == 2 && sender instanceof Player) {
+        	target = (Player) sender;
+        	amount = 1;
+        }
+        if(args.length == 3 && sender instanceof Player) {
+        	target = (Player) sender;
+        	try {
+        		amount = Integer.valueOf(args[2]);
+        	} catch(NumberFormatException e) {
+        		target = Bukkit.getPlayer(args[2]);
+        		amount = 1;
+        	}
+        }
+        if(args.length == 3 && !(sender instanceof Player)) {
+        	target = Bukkit.getPlayer(args[2]);
+        	amount = 1;
+        }
+        if(args.length == 4) {
+        	target = Bukkit.getPlayer(args[2]);
+        	try {
+        		amount = Integer.valueOf(args[3]);
+        	} catch(NumberFormatException e) {
+        		sender.sendMessage(plugin.getUtils().color("&cIncorrect usage. Use: /holotools give <item> <player> <amount>"));
+                return;
+        	}
+        }
         if(target == null){
             sender.sendMessage(plugin.getUtils().color("&cPlayer not found."));
+            return;
+        }
+        if(amount <= 0){
+            sender.sendMessage(plugin.getUtils().color("&cAmount cannot be 0 or negative."));
             return;
         }
 

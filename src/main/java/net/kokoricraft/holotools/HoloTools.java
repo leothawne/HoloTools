@@ -39,7 +39,7 @@ public final class HoloTools extends JavaPlugin {
     private LangManager langManager;
     private UpdateChecker updateChecker;
     public boolean UPDATED = true;
-    public String VERSION;
+    public int BUILD;
 
     @Override
     public void onEnable() {
@@ -49,12 +49,12 @@ public final class HoloTools extends JavaPlugin {
         initListeners();
         checkPlayers();
 
-        updateChecker = new UpdateChecker(this, 119315);
-        updateChecker.getVersion(version -> {
-            VERSION = version;
-            if(!getDescription().getVersion().equals(version)) {
+        updateChecker = new UpdateChecker(this);
+        updateChecker.getVersion(build -> {
+        	BUILD = build;
+            if(Integer.valueOf(getDescription().getVersion().split("\\-")[1]) < build) {
                 UPDATED = false;
-                updateChecker.sendMessage(Bukkit.getConsoleSender(), UPDATED, version);
+                updateChecker.sendMessage(Bukkit.getConsoleSender(), UPDATED, build);
             }
         });
 

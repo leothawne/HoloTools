@@ -16,18 +16,16 @@ import net.kokoricraft.holotools.HoloTools;
 public class UpdateChecker {
 
     private final HoloTools plugin;
-    private final int resourceId;
 
-    public UpdateChecker(HoloTools plugin, int resourceId) {
+    public UpdateChecker(HoloTools plugin) {
         this.plugin = plugin;
-        this.resourceId = resourceId;
     }
 
-    public void getVersion(final Consumer<String> consumer) {
+    public void getVersion(final Consumer<Integer> consumer) {
         Bukkit.getScheduler().runTaskAsynchronously(this.plugin, () -> {
-            try (InputStream is = new URI("https://api.spigotmc.org/legacy/update.php?resource=" + this.resourceId + "/~").toURL().openStream(); Scanner scann = new Scanner(is)) {
+            try (InputStream is = new URI("https://jenkins.gmj.net.br/job/LTItemMail/lastSuccessfulBuild/buildNumber").toURL().openStream(); Scanner scann = new Scanner(is)) {
                 if (scann.hasNext()) {
-                    consumer.accept(scann.next());
+                    consumer.accept(Integer.valueOf(scann.next()));
                 }
             } catch (IOException | URISyntaxException e) {
                 plugin.getLogger().info("Unable to check for updates: " + e.getMessage());
@@ -35,10 +33,10 @@ public class UpdateChecker {
         });
     }
 
-    public void sendMessage(CommandSender sender, boolean updated, String version){
+    public void sendMessage(CommandSender sender, boolean updated, int build){
         if(updated || !plugin.getConfigManager().UPDATE_CHECKER) return;
 
-        sender.sendMessage(plugin.getUtils().color(String.format("&eA new version is available! [%s]", version)));
-        sender.sendMessage(plugin.getUtils().color("&eLink: https://www.spigotmc.org/resources/holotools-new-version."+resourceId));
+        sender.sendMessage(plugin.getUtils().color(String.format("&eA new build is available! [#%s]", build)));
+        sender.sendMessage(plugin.getUtils().color(String.format("&eLink: https://jenkins.gmj.net.br/job/HoloTools/%s/", build)));
     }
 }
